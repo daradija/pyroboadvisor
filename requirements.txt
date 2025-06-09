@@ -1,0 +1,6 @@
+yfinance<=0.2.61
+pandas
+numpy
+plotly
+matplotlib
+scipy
