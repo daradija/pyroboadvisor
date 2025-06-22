@@ -66,8 +66,34 @@ python3 sample.py
 Por consola se muestra el progreso de la simulación y al finalizar se genera un 
 gráfico con el resultado de la simulación.
 
+```console
+2024-04-30 Value: $317250 $43055 ENPH/124 INCY/264 PODD/606 MRNA/720 PCG/1278 RMD/18 TSLA/206 
+TAE: 30.97% DDPP: 77.92%/77.77% Comisión: $0.00
+2024-05-01 Value: $316576 $43055 ENPH/124 INCY/264 PODD/606 MRNA/720 PCG/1278 RMD/18 TSLA/206 
+TAE: 30.88% DDPP: 75.42%/77.76% Comisión: $0.00
+2024-05-02 Value: $329023 $43055 ENPH/124 INCY/264 PODD/606 MRNA/720 PCG/1278 RMD/18 TSLA/206 
+TAE: 32.04% DDPP: 87.50%/77.77% Comisión: $0.00
+2024-05-03 Value: $330670 $43055 ENPH/124 INCY/264 PODD/606 MRNA/720 PCG/1278 RMD/18 TSLA/206 
+TAE: 32.17% DDPP: 87.92%/77.79% Comisión: $0.18
+2024-05-06 Value: $331146 $25202 ENPH/124 INCY/264 PODD/606 MRNA/720 PAYC/105 PCG/1278 RMD/18 TSLA/206 
+TAE: 32.14% DDPP: 88.75%/77.80% Comisión: $0.00
+2024-05-07 Value: $334058 $25202 ENPH/124 INCY/264 PODD/606 MRNA/720 PAYC/105 PCG/1278 RMD/18 TSLA/206 
+TAE: 32.39% DDPP: 90.42%/77.81% Comisión: $0.00
+2024-05-08 Value: $327842 $25202 ENPH/124 INCY/264 PODD/606 MRNA/720 PAYC/105 PCG/1278 RMD/18 TSLA/206 
+TAE: 31.79% DDPP: 85.83%/77.82% Comisión: $150.57
+2024-05-09 Value: $329793 $100297 AMD/91 ENPH/124 INCY/264 PODD/606 PAYC/105 PCG/1278 RMD/18 TSLA/206 
+TAE: 31.95% DDPP: 86.67%/77.83% Comisión: $0.00
+2024-05-10 Value: $321358 $100297 AMD/91 ENPH/124 INCY/264 PODD/606 PAYC/105 PCG/1278 RMD/18 TSLA/206 
+````
+Durante la simulación se muestra:
+- La fecha, en formato `YYYY-MM-DD`.
+- El valor total de la cartera.
+- El valor en efectivo disponible.
+- Las acciones en la cartera, con su cantidad.
+- El TAE (Tasa Anual Equivalente) de la cartera desde el comienzo de la simulación.
+- El draw down por percentiles, tanto el instantaneo como el medio.
 
-
+El DDPP (Draw Down por Percentiles) es una medida del riesgo de la cartera, que me he inventado. Un número mayor es mejor. Por ejemplo un 100% indica que el valor de tasación está por encima del 100% de los últimos 240 días (1 año).
 
 # Parámetros
 
