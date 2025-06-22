@@ -11,7 +11,7 @@ En nuestro roadmap está previsto implementar un driver de acceso a Interactive 
 
 https://www.interactivebrokers.ie/es/home.php
 
-Por lo tanto si quieres probar PyRoboAdvisor, de forma automatizada debes tener una cuenta de Interactive Brokers.
+Por lo tanto si quieres operar PyRoboAdvisor, de forma automatizada debes tener una cuenta de Interactive Brokers. Es bajo tu entera responsabilidad la ejecución y automatización de las órdenes de compra y venta. 
 
 # Instalación
 
@@ -89,6 +89,8 @@ TAE: 31.79% DDPP: 85.83%/77.82% Comisión: $150.57
 TAE: 31.95% DDPP: 86.67%/77.83% Comisión: $0.00
 2024-05-10 Value: $321358 $100297 AMD/91 ENPH/124 INCY/264 PODD/606 PAYC/105 PCG/1278 RMD/18 TSLA/206 
 ````
+Rentabilidades pasadas no garantizan rentabilidades futuras.
+
 Durante la simulación se muestra:
 - La fecha, en formato `YYYY-MM-DD`.
 - El valor total de la cartera.
