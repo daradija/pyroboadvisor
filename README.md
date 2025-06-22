@@ -1,59 +1,104 @@
 # PyRoboAdvisor
 
-Nota: En los próximos días completo la documentación de uso.
+Para conocer el proyecto y la filosofía detrás de PyRoboAdvisor, visita el siguiente enlace:
+# [PyRoboAdvisor](https://pyroboadvisor.com)
 
-El objetivo de PyRoboAdvisor es estandarizar un marco de trabajo y de testeo de estrategia.
+# Pre-requisitos
+Para ejecutar PyRoboAdvisor, debes comprar una licencia de la estrategia A1.
+Tras la compra llega una clave por correo electrónico.
 
-Uno siempre piensa que tiene mas capacidad diseñando estrategias hasta que se pone a prueba.
+Actualmente solo está operativo el modo de simulación. 
+En nuestro roadmap está previsto implementar un driver de acceso a Interactive Brokers, que es el broker que utilizamos para operar.
 
-Se trata de evitar errores muy comunes.
+Por lo tanto si quieres probar PyRoboAdvisor, de forma automatizada debes tener una cuenta de Interactive Brokers.
 
-1. Aplicar un Forward Test.
-2. Ejecución de órdenes a book order.
-3. Utilizar fuente de datos sin errores.
-4. Evitar sobre-entrenamiento.
+# Instalación
 
-Estos principios son innegociables.
-Las razones de ser son respectivamente:
-1. Salva de manipular el algoritmo hasta que da un resultado favorable.
-2. Las operaciones a book order pagan menos comisiones.
-3. Evita errores inducidos por los datos.
-4. Evita estrategias cuyo espacio de parámetros presente fuerte oscilaciones en los resultados.
+Instala python 3.10 o superior.
 
-¿Cuál es el objetivo?
+Descarga el código fuente de PyRoboAdvisor desde el repositorio oficial de GitHub:
 
-Que el diseñador de estrategias de inversión ponga a prueba su estrategia. Y pueda compararlas con la comunidad.
+```bash
+git clone https://github.com/daradija/pyroboadvisor.git
+cd pyroboadvisor
+```
 
-En este caso puede ocurrir tres escenarios.
+Edita el archivo sample.py y añade tu email y clave de licencia:
 
-1. Que tras la prueba su estrategia sea mejor.
-- En cuyo caso puede decidir compartirla o no compartirla con la comunidad.
-- Si la comparte: Puede obtener recursos del club. Puede trabajar en fusionar sus estrategias con el resto de la comunidad y aprender compartiendo.
-- Si no la comparte. Tendrá un subidón de ego. Y segurá por libre. En este caso, le recomiento dejarlo aquí y no seguir adelante, ya que perderá su tiempo.
-2. Que tras la prueba su estrategia sea peor.
-- En cuyo caso le convendría apuntarse al club para partir del nivel de conocimiento del club.
+```python
+p={
+    "fecha_inicio": "2019-01-01",
+    "fecha_fin": "2025-12-31",
+    "money": 100000,
+    "numberStocksInPortfolio": 10,
+    "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
+    "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
+    "apalancamiento": 10 / 6,  # apalancamiento de las compras
+    "ring_size": 240,
+    "rlog_size": 24,
+    "cabeza": 5,
+    "seeds": 100,
+    "percentil": 95,
+    "prediccion": 1,
 
-Obviamente las estrategias no se pueden regalar. Una estrategia que se sobre-explota se parasita a si misma y por definición deja de ser rentable.
+    "key": "",
+    "email": "",
+}
+```
 
-El club trata de establecer un valor por estrategia. Solo compartirás tu estratagias con los miembros que hayan aportado algo mas valioso que tu. 
+Instala las dependencias necesarias ejecutando el siguiente comando:
 
-Si alguien tiene interés en llegar a tu código, puede hacer una aportación económica.
+```bash
+pip install -r requirements.txt
+``` 
 
-Los miembros que aporten mas que reciban, pueden disponer de dichos fondos, y decidir en qué se emplearán. 
+Sin funciona prueba:
+```bash
+python3 -m pip install -r requirements.txt
+```
 
-En general el 50% de los fondos se emplean en algo gratuito para la comunidad (pyroboadvisor.com) y el otro 50% en algo privativo para socios (pyroboadvisor.org).
+# Ejecución
+Para ejecutar PyRoboAdvisor, utiliza el siguiente comando:
+```bash
+python3 sample.py
+````
 
-Es una democracia, ponderada por las aportaciones.
-
-El valor de las estrategias las decide:
-
-- Los test normalizados.
-- Su uso por otros socios.
-
-Es por lo tanto fundamental que los socios y usuarios informen del uso exacto que realizan de las estrategias.
-
-pyroboadvisor.com abarca toda la parte libre y estandarizada.
-Mientra que pyroboadvisor.org abarca el club.
+Por consola se muestra el progreso de la simulación y al finalizar se genera un 
+gráfico con el resultado de la simulación.
 
 
 
+
+# Parámetros
+
+Si deseas afinar el algoritmo, puedes modificar los parámetros en el diccionario `p` del archivo `sample.py`.
+
+## Periodo de simulación
+Los parámetros `fecha_inicio` y `fecha_fin` definen el periodo de simulación.
+
+Para especificar la cantidad de dolares iniciales, utiliza el parámetro `money`.
+
+Para modelar el tamañano de acciones en la cartera, utiliza el parámetro `numberStocksInPortfolio`.
+
+Cada vez que el sistema decide comprar o vender acciones se utiliza el precio de apertura mas un margen. Para ello, utiliza los parámetros `orderMarginBuy` y `orderMarginSell`. Que están en tantos por 1. Por ejemplo, si quieres un margen del 0.5% para las órdenes de compra y venta, debes establecer `orderMarginBuy` y `orderMarginSell` a 0.005.
+El objetivo es introducir las ordenes en el book order y pagar menos comisiones.
+
+Si estos valores suben, el sistema compra y vende menos vece, pero el rendimiento no se ve muy mermado. A partir del 5% he observado que compra tan poco que deja de operar. Pagar menos comisiones por hacer menos operaciones a cambio de esperar mas días para ver una rotación. 
+
+Jugar con una asimetría conduce a resultados curiosos.
+
+Si deseas utilizar el apalancamiento que ofrece el broker, puedes establecer el parámetro `apalancamiento`. Un valor mayor de 1 indica que se está utilizando apalancamiento. Y menor de 1 indica lo contrario. 
+
+El resto de parámetros son internos del algoritmo y no es necesario modificarlos, a menos que sepas lo que estás haciendo:
+
+`ring_size` es una ventana para suavizar los precios de las acciones y evitar el ruido de las fluctuaciones diarias. Un valor de 240 es adecuado para un periodo de 1 año con datos diarios. Observarás que si lo cambias suele bajar el desempeño. Ya que la bolsa suele tener un ciclos de 240 días laborales por año.
+
+Ahora se utiliza otro conjunto de días para establecer la tendencia de los precios, que es `rlog_size`. Este parámetro define el número de días que se utilizan para calcular la tendencia de los precios. Un valor de 24 es aproximadamente 1 mes de datos. Un periodo mas pequeño puede detectar tendencias a corto plazo, mientras que un periodo mas grande puede detectar tendencias a largo plazo.
+
+Se realizan del orden de 'seeds' estimadores. Poner mas seeds puede mejorar la precisión de las predicciones, pero también aumenta el tiempo de ejecución. Un valor de 100 es un buen punto de partida.
+
+Los estimadores usan un número de acciones como referencia ('cabeza') para establecer el estimador.  
+
+El parámetro mas poderoso es el `percentil`, en teoría se tendría que usar el percentil 50, pero he observado que el percentil 95 da mejores resultados. Es decir, hay que ser obtimista con respecto a las predicciones. 
+
+El sistema por defecto realiza una predicción de 1 día, es decir, el sistema predice el precio de la acción al día siguiente. Si deseas cambiar esto, puedes modificar el parámetro `prediccion`. Por ejemplo, si quieres predecir el precio a 5 días vista, establece `prediccion` a 5, 10, el número ha de ser menor que la ventana `rlog_size`. Ya que la predicción consume parte de esta ventana. No pongas mas de un 50% del valor de `rlog_size`.
