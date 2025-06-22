@@ -2,16 +2,21 @@
 
 El objetivo de PyRoboAdvisor es estandarizar un marco de trabajo y de testeo de estrategia.
 
-Uno siempre piensa que tiene mas capacidad ...
+Uno siempre piensa que tiene mas capacidad diseñando estrategias hasta que se pone a prueba.
 
 Se trata de evitar errores muy comunes.
 
 1. Aplicar un Forward Test.
-2. Ejecución de órdenes a mercados.
+2. Ejecución de órdenes a book order.
 3. Utilizar fuente de datos sin errores.
 4. Evitar sobre-entrenamiento.
 
-Estos principios son 
+Estos principios son innegociables.
+Las razones de ser son respectivamente:
+1. Salva de manipular el algoritmo hasta que da un resultado favorable.
+2. Las operaciones a book order pagan menos comisiones.
+3. Evita errores inducidos por los datos.
+4. Evita estrategias cuyo espacio de parámetros presente fuerte oscilaciones en los resultados.
 
 ¿Cuál es el objetivo?
 
@@ -26,7 +31,7 @@ En este caso puede ocurrir tres escenarios.
 2. Que tras la prueba su estrategia sea peor.
 - En cuyo caso le convendría apuntarse al club para partir del nivel de conocimiento del club.
 
-Obviamente las estrategias no se pueden regalar. 
+Obviamente las estrategias no se pueden regalar. Una estrategia que se sobre-explota se parasita a si misma y por definición deja de ser rentable.
 
 El club trata de establecer un valor por estrategia. Solo compartirás tu estratagias con los miembros que hayan aportado algo mas valioso que tu. 
 
@@ -39,13 +44,14 @@ En general el 50% de los fondos se emplean en algo gratuito para la comunidad (p
 Es una democracia, ponderada por las aportaciones.
 
 El valor de las estrategias las decide:
+
 - Los test normalizados.
 - Su uso por otros socios.
 
-Es por lo tanto fundamental que los socios informen del uso exacto que realizan de las estrategias.
+Es por lo tanto fundamental que los socios y usuarios informen del uso exacto que realizan de las estrategias.
 
-pyroboadvisor.com por lo tanto abarca toda la parte libre y estandarizada.
-
+pyroboadvisor.com abarca toda la parte libre y estandarizada.
+Mientra que pyroboadvisor.org abarca el club.
 
 
 

@@ -1,6 +1,42 @@
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
+import numpy as np
+
+import os
+import pickle
+import hashlib
+import functools
+
+def make_hash(func_name, args, kwargs):
+    """Crea un hash único para la función y sus argumentos."""
+    data = (func_name, tuple(sorted(kwargs.items())))
+    data_bytes = pickle.dumps(data)
+    return hashlib.md5(data_bytes).hexdigest()
+
+def disk_cache(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Crear la carpeta de cache si no existe
+        cache_dir = "../cache"
+        os.makedirs(cache_dir, exist_ok=True)
+        
+        # Crear el hash y el nombre del archivo
+        key = make_hash(func.__name__, args, kwargs)
+        cache_file = os.path.join(cache_dir, f"{key}.pkl")
+        
+        # Si el archivo ya existe, cargar el resultado
+        if os.path.exists(cache_file):
+            with open(cache_file, "rb") as f:
+                return pickle.load(f)
+        
+        # Si no, llamar a la función y guardar el resultado
+        result = func(*args, **kwargs)
+        with open(cache_file, "wb") as f:
+            pickle.dump(result, f)
+        return result
+
+    return wrapper
 
 class Source:
     LIMITES_INTERVALO = {
@@ -25,7 +61,29 @@ class Source:
         gestor = self
         gestor.descargar_datos()
         datos_limpiados = gestor.limpiar_datos()
-        return datos_limpiados
+        # saca las claves en self.symbols
+        self.symbols = list(datos_limpiados.keys())
+        self.size= len(self.symbols)
+
+        self.dates=[]
+        self.open=[]
+        self.close=[]
+        self.high=[]
+        self.low=[]
+        for symbol in self.symbols:
+            df = datos_limpiados[symbol]
+            self.dates.append(df['Date'].tolist())
+            self.open.append(df['Open'].tolist())
+            self.close.append(df['Close'].tolist())
+            self.high.append(df['High'].tolist())
+            self.low.append(df['Low'].tolist())
+        self.dates = self.dates
+        self.open = self.open
+        self.close = self.close
+        self.high = self.high
+        self.low = self.low
+        
+
 
     def dividir_rango_fechas(self, inicio, fin, max_dias):
         bloques = []
@@ -37,6 +95,15 @@ class Source:
             inicio_dt = bloque_fin_dt + timedelta(days=1)
         return bloques
 
+    @disk_cache
+    def get_datos(self,instrumento=None,start=None,end=None,interval=None,progress=False):
+        return yf.download(
+            instrumento,
+            start=start,
+            end=end,
+            interval=interval,
+            progress=progress
+        )
     def descargar_datos(self):
         try:
             limite = self.LIMITES_INTERVALO.get(self.intervalo)
@@ -50,8 +117,8 @@ class Source:
                 for bloque in bloques:
                     inicio_bloque, fin_bloque = bloque
                     print(f"📥 Descargando {instrumento} desde {inicio_bloque} hasta {fin_bloque} con intervalo {self.intervalo}")
-                    df_bloque = yf.download(
-                        instrumento,
+                    df_bloque = self.get_datos(
+                        instrumento=instrumento,
                         start=inicio_bloque,
                         end=fin_bloque,
                         interval=self.intervalo,
@@ -93,8 +160,6 @@ class Source:
         else:
             print("⚠️ No hay datos para limpiar.")
             return None
-
-
 
 if __name__ == "__main__":
     instrumentos = ["AAPL", "GOOGL"]

@@ -4,3 +4,6 @@ numpy
 plotly
 matplotlib
 scipy
+lxml
+fastapi
+pydantic
