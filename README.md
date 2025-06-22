@@ -1,7 +1,6 @@
 # PyRoboAdvisor
 
-Para conocer el proyecto y la filosofía detrás de PyRoboAdvisor, visita el siguiente enlace:
-# [PyRoboAdvisor](https://pyroboadvisor.com)
+Para conocer el proyecto y la filosofía detrás de PyRoboAdvisor, visita el siguiente enlace: [PyRoboAdvisor](https://pyroboadvisor.com)
 
 # Pre-requisitos
 Para ejecutar PyRoboAdvisor, debes comprar una licencia de la estrategia A1.
@@ -92,6 +91,7 @@ Durante la simulación se muestra:
 - Las acciones en la cartera, con su cantidad.
 - El TAE (Tasa Anual Equivalente) de la cartera desde el comienzo de la simulación.
 - El draw down por percentiles, tanto el instantaneo como el medio.
+- Si ha operado se muestra la comisión pagada en la operación.
 
 El DDPP (Draw Down por Percentiles) es una medida del riesgo de la cartera, que me he inventado. Un número mayor es mejor. Por ejemplo un 100% indica que el valor de tasación está por encima del 100% de los últimos 240 días (1 año).
 
