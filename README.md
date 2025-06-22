@@ -95,6 +95,9 @@ Durante la simulación se muestra:
 
 El DDPP (Draw Down por Percentiles) es una medida del riesgo de la cartera, que me he inventado. Un número mayor es mejor. Por ejemplo un 100% indica que el valor de tasación está por encima del 100% de los últimos 240 días (1 año).
 
+![](assets/17506106676794.jpg)
+Gráfica mostrada al final, comparando la estrategia con el índice de referencia.
+
 # Parámetros
 
 Si deseas afinar el algoritmo, puedes modificar los parámetros en el diccionario `p` del archivo `sample.py`.
