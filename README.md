@@ -62,6 +62,9 @@ Para ejecutar PyRoboAdvisor, utiliza el siguiente comando:
 python3 sample.py
 ````
 
+Hay algunos acciones que pueden fallar en la descarga, no te preocupes, el sistema las ignora y continúa con las acciones restantes.
+Las acciones las descarga de Yahoo Finance y los símbolos de la wikipedia.
+
 Por consola se muestra el progreso de la simulación y al finalizar se genera un 
 gráfico con el resultado de la simulación.
 
