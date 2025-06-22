@@ -9,6 +9,8 @@ Tras la compra llega una clave por correo electrónico.
 Actualmente solo está operativo el modo de simulación. 
 En nuestro roadmap está previsto implementar un driver de acceso a Interactive Brokers, que es el broker que utilizamos para operar.
 
+https://www.interactivebrokers.ie/es/home.php
+
 Por lo tanto si quieres probar PyRoboAdvisor, de forma automatizada debes tener una cuenta de Interactive Brokers.
 
 # Instalación
