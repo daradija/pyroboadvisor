@@ -1,5 +1,7 @@
 # PyRoboAdvisor
 
+Nota: En los próximos días completo la documentación de uso.
+
 El objetivo de PyRoboAdvisor es estandarizar un marco de trabajo y de testeo de estrategia.
 
 Uno siempre piensa que tiene mas capacidad diseñando estrategias hasta que se pone a prueba.
