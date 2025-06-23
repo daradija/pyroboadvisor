@@ -5,6 +5,11 @@ import pandas as pd
 from market.simulator import Simulator
 from market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
 from strategyClient import StrategyClient as Strategy
+import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
 
 # Leer la tabla de Wikipedia
 url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
@@ -33,8 +38,8 @@ p={
     "percentil": 95,
     "prediccion": 1,
 
-    "key": "",
-    "email": "",
+    "key": os.getenv("PYROBOADVISOR_KEY", ""),
+    "email": os.getenv("PYROBOADVISOR_EMAIL", ""),
 }
 
 source=Source(

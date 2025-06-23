@@ -24,7 +24,17 @@ git clone https://github.com/daradija/pyroboadvisor.git
 cd pyroboadvisor
 ```
 
-Edita el archivo sample.py y añade tu email y clave de licencia:
+Crea un archivo `.env` en el directorio raíz del proyecto y añade tu email y clave de licencia:
+
+```bash
+# Archivo .env
+PYROBOADVISOR_KEY=tu_clave_de_licencia_aqui
+PYROBOADVISOR_EMAIL=tu_email@ejemplo.com
+```
+
+**Importante:** El archivo `.env` contiene información sensible, asegúrate de no compartirlo públicamente y de añadirlo a tu archivo `.gitignore` si planeas hacer commit de tu código.
+
+El sistema ahora carga automáticamente estas variables desde el archivo `.env`. El diccionario de parámetros en `sample.py` se ve así:
 
 ```python
 p={
@@ -42,8 +52,8 @@ p={
     "percentil": 95,
     "prediccion": 1,
 
-    "key": "",
-    "email": "",
+    "key": os.getenv("PYROBOADVISOR_KEY", ""),
+    "email": os.getenv("PYROBOADVISOR_EMAIL", ""),
 }
 ```
 
