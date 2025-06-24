@@ -161,6 +161,35 @@ class Source:
             print("⚠️ No hay datos para limpiar.")
             return None
 
+    def realTime(self,symbols):
+        """
+        Obtiene el precio casi “en vivo” de los instrumentos especificados.
+        """
+        resultados = []  # para devolver un dict {símbolo: precio}
+        for symbol in symbols:
+            try:
+                ticker = yf.Ticker(symbol)
+                # regularMarketPrice = último precio en la sesión regular
+                precio = ticker.info.get("regularMarketPrice", None)
+                if precio is None:
+                    # fallback: usar la última vela (por si ticker.info falla)
+                    hist = ticker.history(period="1d", interval=self.intervalo, prepost=True)
+                    if not hist.empty:
+                        precio = hist["Close"].iloc[-1]
+                if precio is not None:
+                    resultados.append(precio)
+                    print(f"📈 {symbol} - Current price: {precio}")
+                else:
+                    resultados.append(0)
+                    print(f"⚠️ No se obtuvo precio para {symbol}")
+            except Exception as e:
+                print(f"❌ Error para {symbol}: {e}")
+                resultados[symbol] = None
+
+        return resultados
+
+
+
 if __name__ == "__main__":
     instrumentos = ["AAPL", "GOOGL"]
     fecha_inicio = "2023-01-01"

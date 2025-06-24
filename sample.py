@@ -17,10 +17,11 @@ tickers = sp500['Symbol'].tolist()
 # partir en servicio web
 # usuario y registrar uso
 # El simulador se ejecuta en los dos sitios y manda hash.
-
+today = pd.Timestamp.now().normalize()
+stoday = today.strftime("%Y-%m-%d")
 p={
     "fecha_inicio": "2019-01-01",
-    "fecha_fin": "2025-12-31",
+    "fecha_fin": stoday,
     "money": 100000,
     "numberStocksInPortfolio": 10,
     "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
@@ -43,6 +44,7 @@ source=Source(
     fecha_fin=p["fecha_fin"],
     intervalo="1d"
 )
+
 sp=SourcePerDay(source)
 p["tickers"]=sp.symbols
 
@@ -51,6 +53,7 @@ simulator=Simulator(sp.symbols)
 simulator.money = p["money"]
 
 s=Strategy(p)
+
 ev=EstrategiaValuacion()
 while True:
     orders=s.open(sp.open)
@@ -66,3 +69,27 @@ while True:
         break
 
 ev.print()
+
+from driver.driverIB import DriverIB as Driver
+d=Driver(7497)
+d.conectar()
+s.set_profolio(d.cash(),d.profolio(sp.symbols))
+
+orders=s.open(source.realTime(sp.symbols))
+
+d.clearOrders()
+
+print("\nComprar:")
+for order in orders["programBuy"]:
+    # redondea cantidad a entero y precio a 2 decimales
+    precio = round(order['price'], 2)
+    cantidad = int(round(order['amount']/precio))
+    print(f"{cantidad} acciones de {sp.symbols[order['id']]} a {precio:.2f}")
+    d.buy_limit(sp.symbols[order['id']], cantidad, precio)
+
+print("\nVender:")
+for order in orders["programSell"]:
+    precio = order['price']
+    cantidad = order['amount']/precio
+    print(f"{cantidad} acciones de {sp.symbols[order['id']]} a {precio:.2f}")
+    d.sell_limit(sp.symbols[order['id']], cantidad, precio)
