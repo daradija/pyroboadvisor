@@ -5,6 +5,12 @@ import pandas as pd
 from market.simulator import Simulator
 from market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
 from strategyClient import StrategyClient as Strategy
+import os
+from dotenv import load_dotenv
+from datetime import datetime
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
 
 # Leer la tabla de Wikipedia
 url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
@@ -19,22 +25,22 @@ tickers = sp500['Symbol'].tolist()
 # El simulador se ejecuta en los dos sitios y manda hash.
 
 p={
-    "fecha_inicio": "2019-01-01",
-    "fecha_fin": "2025-12-31",
-    "money": 100000,
-    "numberStocksInPortfolio": 10,
+    "fecha_inicio": "2019-01-01", # descarga desde 2019
+    "fecha_fin": datetime.now().strftime("%Y-%m-%d"), # descarga hasta la fecha actual es posible que no se pueda descargar hasta la fecha actual
+    "money": 100000,  # dinero inicial
+    "numberStocksInPortfolio": 10, # cantidad de acciones en el portafolio
     "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
     "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
     "apalancamiento": 10 / 6,  # apalancamiento de las compras
-    "ring_size": 240,
-    "rlog_size": 24,
-    "cabeza": 5,
-    "seeds": 100,
-    "percentil": 95,
-    "prediccion": 1,
+    "ring_size": 240, # tamaño del ring
+    "rlog_size": 24, # tamaño del rlog
+    "cabeza": 5, # cabeza de la estrat  egia
+    "seeds": 100, # semillas de la estrategia
+    "percentil": 95, # percentil de la e    strategia
+    "prediccion": 1, # prediccion de la estrategia
 
-    "key": "",
-    "email": "",
+    "key": os.getenv("PYROBOADVISOR_KEY", ""), # key de pyroboadvisor
+    "email": os.getenv("PYROBOADVISOR_EMAIL", ""), # email de pyroboadvisor
 }
 
 source=Source(
