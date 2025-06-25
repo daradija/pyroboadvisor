@@ -53,7 +53,7 @@ Instala las dependencias necesarias ejecutando el siguiente comando:
 pip install -r requirements.txt
 ``` 
 
-Sin funciona prueba:
+Si no funciona prueba:
 ```bash
 python3 -m pip install -r requirements.txt
 ```
