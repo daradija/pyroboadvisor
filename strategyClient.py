@@ -1,4 +1,6 @@
 import requests
+import warnings
+
 
 class StrategyClient:
     def __init__(self,p):
@@ -6,6 +8,10 @@ class StrategyClient:
         api_url="https://pyroboadvisor.org"
         if self.verify_ssl is False:
             api_url="https://localhost:443"
+            warnings.filterwarnings(
+                "ignore",
+                message="Unverified HTTPS request"
+            )
         self.api_url = api_url.rstrip("/")
         self.session_id = None
 
