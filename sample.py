@@ -77,7 +77,7 @@ s.set_profolio(d.cash(),d.profolio(sp.symbols))
 
 orders=s.open(source.realTime(sp.symbols))
 
-#d.clearOrders()
+d.clearOrders()
 
 print("\nComprar:")
 for order in orders["programBuy"]:
@@ -85,11 +85,11 @@ for order in orders["programBuy"]:
     precio = round(order['price'], 2)
     cantidad = int(round(order['amount']/precio))
     print(f"{cantidad} acciones de {sp.symbols[order['id']]} a {precio:.2f}")
-    #d.buy_limit(sp.symbols[order['id']], cantidad, precio)
+    d.buy_limit(sp.symbols[order['id']], cantidad, precio)
 
 print("\nVender:")
 for order in orders["programSell"]:
     precio = order['price']
     cantidad = order['amount']/precio
     print(f"{cantidad} acciones de {sp.symbols[order['id']]} a {precio:.2f}")
-    #d.sell_limit(sp.symbols[order['id']], cantidad, precio)
+    d.sell_limit(sp.symbols[order['id']], cantidad, precio)
