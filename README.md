@@ -53,7 +53,7 @@ Instala las dependencias necesarias ejecutando el siguiente comando:
 pip install -r requirements.txt
 ``` 
 
-Sin funciona prueba:
+Si no funciona prueba:
 ```bash
 python3 -m pip install -r requirements.txt
 ```
@@ -63,9 +63,16 @@ Para ejecutar PyRoboAdvisor, utiliza el siguiente comando:
 ```bash
 python3 sample.py
 ````
+o en las versiones modernas:
+```bash
+py sample.py
+```
 
-Hay algunos acciones que pueden fallar en la descarga, no te preocupes, el sistema las ignora y continúa con las acciones restantes.
-Las acciones las descarga de Yahoo Finance y los símbolos de la wikipedia.
+Los datos lo descargamos de yahoo finance y tardan mucho. Es gratis, una fuente de datos gratis y no puedes exigir mucho por ello.
+El que me aporte una nueva fuente de datos le regalo una licencia para la próxima versión.
+
+Nota: Hay algunos acciones que pueden fallar en la descarga, no te preocupes, el sistema las ignora y continúa con las acciones restantes.
+Los símbolos los descarga de wikipedia y son la composición del SP500.
 
 Por consola se muestra el progreso de la simulación y al finalizar se genera un 
 gráfico con el resultado de la simulación.
@@ -137,3 +144,7 @@ El resto de parámetros son internos del algoritmo y no es necesario modificarlo
 - El parámetro mas poderoso es el `percentil`, en teoría se tendría que usar el percentil 50, pero he observado que el percentil 95 da mejores resultados. Es decir, hay que ser obtimista con respecto a las predicciones. 
 
 - El sistema por defecto realiza una predicción de 1 día, es decir, el sistema predice el precio de la acción al día siguiente. Si deseas cambiar esto, puedes modificar el parámetro `prediccion`. Por ejemplo, si quieres predecir el precio a 5 días vista, establece `prediccion` a 5, 10, el número ha de ser menor que la ventana `rlog_size`. Ya que la predicción consume parte de esta ventana. No pongas mas de un 50% del valor de `rlog_size`.
+
+# Driver
+Hay que instalar el require del driver.
+
