@@ -159,4 +159,9 @@ Si no quieres que introduzca automáticamente las órdenes comenta las líneas d
 
 Puedes ver las ordenes señales e introducirlas tu mismo.
 
+En caso de que veas este error es que has ejecutado la operatoria ya hoy. 
+Puedes comprar una segunda licencia.
+O esperarte a mañana.
 ![](assets/17509398429337.jpg)
+
+No pasa nada si un día te saltas la rotación. La mayoría de los días no dará recomendaciones. 
