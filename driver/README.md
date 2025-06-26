@@ -159,6 +159,20 @@ Si no quieres que introduzca automáticamente las órdenes comenta las líneas d
 
 Puedes ver las ordenes señales e introducirlas tu mismo.
 
+```console
+📈 ZTS - Current price: 157.2
+
+Comprar:
+82 acciones de SMCI a 46.73
+[BUY-LMT] 82 SMCI @ 46.73
+
+Vender:
+22.63850000000002 acciones de AMZN a 213.71
+[SELL-LMT] 23 AMZN @ 213.71
+11.566 acciones de MSFT a 498.43
+[SELL-LMT] 11 MSFT @ 498.43
+```
+
 En caso de que veas este error es que has ejecutado la operatoria ya hoy. 
 Puedes comprar una segunda licencia.
 O esperarte a mañana.
