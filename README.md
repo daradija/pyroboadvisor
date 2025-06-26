@@ -146,5 +146,5 @@ El resto de parámetros son internos del algoritmo y no es necesario modificarlo
 - El sistema por defecto realiza una predicción de 1 día, es decir, el sistema predice el precio de la acción al día siguiente. Si deseas cambiar esto, puedes modificar el parámetro `prediccion`. Por ejemplo, si quieres predecir el precio a 5 días vista, establece `prediccion` a 5, 10, el número ha de ser menor que la ventana `rlog_size`. Ya que la predicción consume parte de esta ventana. No pongas mas de un 50% del valor de `rlog_size`.
 
 # Driver
-Hay que instalar el require del driver.
 
+[[Driver de Interactive Broker y operatoria en Real]]
