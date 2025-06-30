@@ -7,6 +7,7 @@ import os
 import pickle
 import hashlib
 import functools
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def make_hash(func_name, args, kwargs):
     """Crea un hash único para la función y sus argumentos."""
@@ -107,34 +108,41 @@ class Source:
     def descargar_datos(self):
         try:
             limite = self.LIMITES_INTERVALO.get(self.intervalo)
-            if limite is not None:
-                bloques = self.dividir_rango_fechas(self.fecha_inicio, self.fecha_fin, limite)
-            else:
-                bloques = [(self.fecha_inicio, self.fecha_fin)]
-            
-            for instrumento in self.lista_instrumentos:
-                lista_dfs = []
-                for bloque in bloques:
-                    inicio_bloque, fin_bloque = bloque
-                    print(f"📥 Descargando {instrumento} desde {inicio_bloque} hasta {fin_bloque} con intervalo {self.intervalo}")
-                    df_bloque = self.get_datos(
-                        instrumento=instrumento,
-                        start=inicio_bloque,
-                        end=fin_bloque,
-                        interval=self.intervalo,
-                        progress=False
-                    )
-                    if not df_bloque.empty:
-                        df_bloque = self.aplanar_columnas(df_bloque)
-                        df_bloque.reset_index(inplace=True)
-                        lista_dfs.append(df_bloque)
-                
-                if lista_dfs:
-                    self.datos_por_instrumento[instrumento] = pd.concat(lista_dfs, ignore_index=True)
-                else:
-                    print(f"⚠️ No se han obtenido datos para {instrumento} en el rango especificado.")
-            
+            bloques = self.dividir_rango_fechas(self.fecha_inicio, self.fecha_fin, limite) if limite else [(self.fecha_inicio, self.fecha_fin)]
+
+            def fetch(instrumento, start, end):
+                print(f"📥 Descargando {instrumento} desde {start} hasta {end} con intervalo {self.intervalo}")
+                df = self.get_datos(
+                    instrumento=instrumento,
+                    start=start,
+                    end=end,
+                    interval=self.intervalo,
+                    progress=False
+                )
+                if not df.empty:
+                    df = self.aplanar_columnas(df)
+                    df.reset_index(inplace=True)
+                return (instrumento, start, end, df)
+
+            tasks = []
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                for instrumento in self.lista_instrumentos:
+                    for start, end in bloques:
+                        tasks.append(executor.submit(fetch, instrumento, start, end))
+
+                symbol_data = {}
+                for future in as_completed(tasks):
+                    instrumento, start, end, df = future.result()
+                    if df is not None and not df.empty:
+                        symbol_data.setdefault(instrumento, []).append(df)
+                    else:
+                        print(f"⚠️ No se han obtenido datos para {instrumento} entre {start} y {end}")
+
+            for instrumento, dfs in symbol_data.items():
+                self.datos_por_instrumento[instrumento] = pd.concat(dfs, ignore_index=True)
+
             return self.datos_por_instrumento
+
         except Exception as error:
             print(f"❌ Error al descargar los datos: {error}")
             return None
