@@ -1,0 +1,35 @@
+{
+    "name": "IB Trading Development Environment",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "11",
+            "jdkDistro": "ms"
+        },
+        "ghcr.io/devcontainers/features/desktop-lite:1": {
+            "password": "ibtrading",
+            "webPort": "6080",
+            "vncPort": "5901"
+        }
+    },
+    "forwardPorts": [6080, 5901, 4001, 4002, 5000, 8080],
+    "portsAttributes": {
+        "6080": {
+            "label": "Desktop (noVNC)",
+            "onAutoForward": "openBrowser"
+        },
+        "4002": {
+            "label": "IB Gateway Paper API",
+            "onAutoForward": "notify"
+        }
+    },
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.pylint"
+            ]
+        }
+    }
+}
