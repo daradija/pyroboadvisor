@@ -23,7 +23,7 @@
             "onAutoForward": "notify"
         }
     },
-    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "postCreateCommand": "bash .devcontainer/complete-setup.sh",
     "customizations": {
         "vscode": {
             "extensions": [
