@@ -52,7 +52,7 @@ pip3 install --user \
     matplotlib \
     flask \
     requests \
-    python3-dotenv \
+    python-dotenv \
     psutil
 
 # Configurar VNC password
