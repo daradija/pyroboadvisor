@@ -13,7 +13,7 @@ class DriverIB:
         self.ib=IB()
         self.ib.connect('127.0.0.1', self.puerto, clientId=1)
 
-    def profolio(self,symbols):
+    def portfolio(self,symbols):
         ps=self.ib.portfolio()
         r=[0]*len(symbols)
         for p in ps:
@@ -26,10 +26,26 @@ class DriverIB:
             if symbol in symbols:
                 r[symbols.index(symbol)] = position 
         return r
-
+    
+    def completeTicketsWithIB(self,tickers):
+        ps=self.ib.portfolio()
+        for p in ps:
+            symbol = p.contract.symbol
+            if not symbol in tickers:
+                print(f"Adding {symbol} to tickers")
+                tickers.append(symbol)
+                
     def cash(self):
         account=self.ib.accountSummary()
         for a in account:
+            if a.tag=="CashBalance":
+                print(f"Cash Balance: {a.value} {a.currency}")
+                if a.currency == "USD":
+                    return float(a.value)
+            if a.tag=="TotalCashBalance":
+                print(f"Total Cash Balance: {a.value} {a.currency}")
+                if a.currency == "USD":
+                    return float(a.value)
             if a.tag == "TotalCashValue":
                 print(f"Total Cash Value: {a.value} {a.currency}")
                 if a.currency == "USD":

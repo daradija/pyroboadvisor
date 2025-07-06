@@ -17,6 +17,31 @@ Por lo tanto si quieres operar PyRoboAdvisor, de forma automatizada debes tener 
 
 Instala python 3.10 o superior.
 
+En Windows, puedes instalar Python desde la Microsoft Store o desde la página oficial de Python: [Python Downloads](https://www.python.org/downloads/).
+
+En Linux, puedes instalar Python utilizando el gestor de paquetes de tu distribución. Por ejemplo, en Ubuntu puedes usar:
+
+```bash
+sudo apt update
+sudo apt install python3 python3-pip
+```
+
+En MacOS, puedes instalar Python utilizando Homebrew:
+
+```bash
+brew install python
+```
+
+Dependiendo del sistema operativo necesitas iniciar un terminal o consola de comandos.
+En Linux o MacOS, abre una terminal. En Windows, abre la consola de comandos (cmd) o PowerShell.
+
+Asegúrate de que tienes `git` instalado. Puedes verificarlo ejecutando:
+
+```bash
+git --version
+```
+Si no lo tienes instalado, puedes descargarlo desde [Git Downloads](https://git-scm.com/downloads) o instalarlo utilizando el gestor de paquetes de tu sistema.
+
 Descarga el código fuente de PyRoboAdvisor desde el repositorio oficial de GitHub:
 
 ```bash
@@ -46,6 +71,17 @@ p={
     "email": "",
 }
 ```
+
+Recomiendo instalar un entorno virtual para evitar conflictos con otras dependencias de Python. Puedes crear un entorno virtual con el siguiente comando:
+
+```bash
+python3 -m venv venv
+```
+Luego, activa el entorno virtual:
+
+```bash
+source venv/bin/activate
+``` 
 
 Instala las dependencias necesarias ejecutando el siguiente comando:
 

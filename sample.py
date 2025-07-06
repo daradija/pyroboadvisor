@@ -1,22 +1,7 @@
-from market.source import Source
-from market.sourcePerDay import SourcePerDay
-import numpy as np
+
+from pyroboadvisor import PyRoboAdvisor
 import pandas as pd
-from market.simulator import Simulator
-from market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
-from strategyClient import StrategyClient as Strategy
 
-# Leer la tabla de Wikipedia
-url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-tablas = pd.read_html(url)
-sp500 = tablas[0]  # La primera tabla es la que contiene la información
-
-# Obtener la columna de los símbolos/tickers
-tickers = sp500['Symbol'].tolist()
-
-# partir en servicio web
-# usuario y registrar uso
-# El simulador se ejecuta en los dos sitios y manda hash.
 today = pd.Timestamp.now().normalize()
 stoday = today.strftime("%Y-%m-%d")
 p={
@@ -24,8 +9,8 @@ p={
     "fecha_fin": stoday,
     "money": 100000,
     "numberStocksInPortfolio": 10,
-    "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
-    "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
+    "orderMarginBuy": 0.05,  # margen de ordenes de compra y venta
+    "orderMarginSell": 0.05,  # margen de ordenes de compra y venta
     "apalancamiento": 10 / 6,  # apalancamiento de las compras
     "ring_size": 240,
     "rlog_size": 24,
@@ -38,58 +23,22 @@ p={
     "email": "",
 }
 
-source=Source(
-    lista_instrumentos=tickers,
-    fecha_inicio=p["fecha_inicio"],
-    fecha_fin=p["fecha_fin"],
-    intervalo="1d"
-)
+pra=PyRoboAdvisor(p)  # verGrafica=True, hora="16:00", tipo=3
 
-sp=SourcePerDay(source)
-p["tickers"]=sp.symbols
+pra.readTickersFromWikipedia()
+pra.completeTickersWithIB()  # Completa los tickers de IB que no están en el SP500, para que pueda venderlos
 
-simulator=Simulator(sp.symbols)
+pra.prepare()  # Prepara los datos y la estrategia
+pra.simulate()
 
-simulator.money = p["money"]
+pra.automatizeOrders()
 
-s=Strategy(p)
+# pra.manual(3000,{ # Para operar manualmente debes indicar los dolares y las posiciones de cartera
+#     "AAPL": 20,
+#     "MSFT": 20,
+# })
 
-ev=EstrategiaValuacion()
-while True:
-    orders=s.open(sp.open)
-    for order in orders["programBuy"]:
-        simulator.programBuy(order["id"], order["price"], order["amount"])
-    for order in orders["programSell"]:
-        simulator.programSell(order["id"], order["price"], order["amount"])
-    s.execute(sp.low, sp.high, sp.close, sp.current)
-    tasacion=simulator.execute(sp.low, sp.high, sp.close, sp.current)
-    ev.add(sp.current, tasacion)
-    hay=sp.nextDay()
-    if not hay:
-        break
+# pra.manualIB() # Lee cartera de IB, muestra ordenes
 
-ev.print()
+# pra.autoIB() # Lee cartera de IB e introduce ordenes
 
-from driver.driverIB import DriverIB as Driver
-d=Driver(7497)
-d.conectar()
-s.set_profolio(d.cash(),d.profolio(sp.symbols))
-
-orders=s.open(source.realTime(sp.symbols))
-
-d.clearOrders()
-
-print("\nComprar:")
-for order in orders["programBuy"]:
-    # redondea cantidad a entero y precio a 2 decimales
-    precio = round(order['price'], 2)
-    cantidad = int(round(order['amount']/precio))
-    print(f"{cantidad} acciones de {sp.symbols[order['id']]} a {precio:.2f}")
-    d.buy_limit(sp.symbols[order['id']], cantidad, precio)
-
-print("\nVender:")
-for order in orders["programSell"]:
-    precio = order['price']
-    cantidad = order['amount']/precio
-    print(f"{cantidad} acciones de {sp.symbols[order['id']]} a {precio:.2f}")
-    d.sell_limit(sp.symbols[order['id']], cantidad, precio)

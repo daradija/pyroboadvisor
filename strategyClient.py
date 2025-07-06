@@ -4,7 +4,7 @@ import warnings
 
 class StrategyClient:
     def __init__(self,p):
-        self.verify_ssl = True  
+        self.verify_ssl = False  
         api_url="https://pyroboadvisor.org"
         if self.verify_ssl is False:
             api_url="https://localhost:443"
@@ -45,7 +45,7 @@ class StrategyClient:
         resp.raise_for_status()
         return resp.json()  # {'success': True}
 
-    def set_profolio(self, cash, portfolio):
+    def set_porfolio(self, cash, portfolio):
         if not self.session_id:
             raise Exception("Session not created")
         payload = {
