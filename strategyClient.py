@@ -1,6 +1,7 @@
 import requests
 import warnings
-
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 class StrategyClient:
     def __init__(self,p):
@@ -13,9 +14,22 @@ class StrategyClient:
                 message="Unverified HTTPS request"
             )
         self.api_url = api_url.rstrip("/")
+
+        self.requests_session = self.configure_requests_session(retries=3, backof_factor=0.5)
         self.session_id = None
 
+
         self.create_session(p)
+
+
+
+    def configure_requests_session(self, retries: int, backof_factor: float) -> requests.Session:
+        session = requests.Session()
+        retry = Retry(connect=retries, backoff_factor=backof_factor)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
 
     def create_session(self, config: dict):
         resp = requests.post(f"{self.api_url}/sessions", json={"config": config,"email": config["email"],
@@ -55,6 +69,7 @@ class StrategyClient:
         resp = requests.post(f"{self.api_url}/sessions/{self.session_id}/set_portfolio", json=payload, verify=self.verify_ssl)
         resp.raise_for_status()
         return resp.json()
+    
 
     # def program_orders(self, orders, simulator):
     #     # Utiliza el mismo simulador que el bucle original
