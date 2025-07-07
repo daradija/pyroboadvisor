@@ -45,6 +45,7 @@ class StrategyClient:
         resp.raise_for_status()
         return resp.json()  # {'success': True}
 
+    # En strategyClient.py, línea ~56, agregar debug:
     def set_profolio(self, cash, portfolio):
         if not self.session_id:
             raise Exception("Session not created")
@@ -52,7 +53,19 @@ class StrategyClient:
             "cash": cash,
             "portfolio": portfolio
         }
-        resp = requests.post(f"{self.api_url}/sessions/{self.session_id}/set_portfolio", json=payload, verify=self.verify_ssl)
+        
+        # DEBUG: Ver qué estamos enviando
+        print(f"DEBUG - Enviando payload: {payload}")
+        print(f"DEBUG - Cash type: {type(cash)}, value: {cash}")
+        print(f"DEBUG - Portfolio type: {type(portfolio)}, length: {len(portfolio) if hasattr(portfolio, '__len__') else 'N/A'}")
+        
+        resp = requests.post(f"{self.api_url}/sessions/{self.session_id}/set_portfolio", 
+                            json=payload, verify=self.verify_ssl)
+        
+        # DEBUG: Ver la respuesta
+        print(f"DEBUG - Response status: {resp.status_code}")
+        print(f"DEBUG - Response text: {resp.text}")
+        
         resp.raise_for_status()
         return resp.json()
 
