@@ -20,7 +20,7 @@ tickers = sp500['Symbol'].tolist()
 today = pd.Timestamp.now().normalize()
 stoday = today.strftime("%Y-%m-%d")
 p={
-    "fecha_inicio": "2019-01-01",
+    "fecha_inicio": "2024-01-01",
     "fecha_fin": stoday,
     "money": 100000,
     "numberStocksInPortfolio": 10,
@@ -71,7 +71,7 @@ while True:
 ev.print()
 
 from driver.driverIB import DriverIB as Driver
-d=Driver(7497)
+d=Driver(4002)
 d.conectar()
 s.set_profolio(d.cash(),d.profolio(sp.symbols))
 
