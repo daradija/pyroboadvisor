@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import warnings
 
 
@@ -13,12 +15,21 @@ class StrategyClient:
                 message="Unverified HTTPS request"
             )
         self.api_url = api_url.rstrip("/")
+        # Create requests session to handle ConnectionError
+        self.requests_session = self.configure_requests_session(retries=3, backof_factor=0.5)
         self.session_id = None
-
         self.create_session(p)
 
+    def configure_requests_session(self, retries: int, backof_factor: float) -> requests.Session:
+        session = requests.Session()
+        retry = Retry(connect=retries, backoff_factor=backof_factor)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
+    
     def create_session(self, config: dict):
-        resp = requests.post(f"{self.api_url}/sessions", json={"config": config,"email": config["email"],
+        resp = self.requests_session.post(f"{self.api_url}/sessions", json={"config": config,"email": config["email"],
             "license_key": config["key"]},verify=self.verify_ssl)
         resp.raise_for_status()
         self.session_id = resp.json()["session_id"]
@@ -28,7 +39,7 @@ class StrategyClient:
         if not self.session_id:
             raise Exception("Session not created")
         payload = {"open20": list(open20)}
-        resp = requests.post(f"{self.api_url}/sessions/{self.session_id}/open", json=payload, verify=self.verify_ssl)
+        resp = self.requests_session.post(f"{self.api_url}/sessions/{self.session_id}/open", json=payload, verify=self.verify_ssl)
         resp.raise_for_status()
         return resp.json()  # {'programSell': [...], 'programBuy': [...]}
 
@@ -41,18 +52,18 @@ class StrategyClient:
             "close": list(close),
             "date": str(date)  # Puede ser datetime.isoformat()
         }
-        resp = requests.post(f"{self.api_url}/sessions/{self.session_id}/execute", json=payload, verify=self.verify_ssl)
+        resp = self.requests_session.post(f"{self.api_url}/sessions/{self.session_id}/execute", json=payload, verify=self.verify_ssl)
         resp.raise_for_status()
         return resp.json()  # {'success': True}
 
-    def set_profolio(self, cash, portfolio):
+    def set_portfolio(self, cash, portfolio):
         if not self.session_id:
             raise Exception("Session not created")
         payload = {
             "cash": cash,
             "portfolio": portfolio
         }
-        resp = requests.post(f"{self.api_url}/sessions/{self.session_id}/set_portfolio", json=payload, verify=self.verify_ssl)
+        resp = self.requests_session.post(f"{self.api_url}/sessions/{self.session_id}/set_portfolio", json=payload, verify=self.verify_ssl)
         resp.raise_for_status()
         return resp.json()
 

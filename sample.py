@@ -5,6 +5,7 @@ import pandas as pd
 from market.simulator import Simulator
 from market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
 from strategyClient import StrategyClient as Strategy
+from datetime import datetime as DateTime
 
 # Leer la tabla de Wikipedia
 url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
@@ -55,12 +56,22 @@ simulator.money = p["money"]
 s=Strategy(p)
 
 ev=EstrategiaValuacion()
+start=DateTime.now()
+num=0
+entro=False
+
 while True:
     orders=s.open(sp.open)
     for order in orders["programBuy"]:
+        entro=True
         simulator.programBuy(order["id"], order["price"], order["amount"])
     for order in orders["programSell"]:
+        entro=True
         simulator.programSell(order["id"], order["price"], order["amount"])
+    until=DateTime.now()
+    num+=1
+    if not entro:
+        print(str(sp.current)[:10] ,"loading at", round((until-start).total_seconds()/num,2), "seconds per day")
     s.execute(sp.low, sp.high, sp.close, sp.current)
     tasacion=simulator.execute(sp.low, sp.high, sp.close, sp.current)
     ev.add(sp.current, tasacion)
@@ -73,7 +84,7 @@ ev.print()
 from driver.driverIB import DriverIB as Driver
 d=Driver(7497)
 d.conectar()
-s.set_profolio(d.cash(),d.profolio(sp.symbols))
+s.set_portfolio(d.cash(),d.profolio(sp.symbols))
 
 orders=s.open(source.realTime(sp.symbols))
 
