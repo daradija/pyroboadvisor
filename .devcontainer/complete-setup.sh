@@ -23,7 +23,8 @@ sudo apt-get install -y \
     xvfb x11vnc xfonts-base \
     libxi-dev libxmu-dev \
     socat netcat-openbsd \
-    python3-pip jq htop tree
+    python3-pip jq htop tree \
+    x11-xserver-utils
 
 # 2. CREAR ESTRUCTURA COMPLETA
 log_info "Creando estructura de directorios..."
@@ -112,18 +113,87 @@ fi
 # 7. CREAR TODOS LOS SCRIPTS AUTOMÁTICAMENTE
 log_info "Creando scripts de automatización..."
 
-# Script para iniciar display
+# Script para iniciar display (versión mejorada sin errores)
 cat > ~/trading/scripts/start-display.sh << 'EOF'
 #!/bin/bash
+set -e
+
+echo "[INFO] Configurando display virtual..."
+
+# Configurar display virtual
 export DISPLAY=:1
-if ! pgrep -x "Xvfb" > /dev/null; then
-    Xvfb :1 -screen 0 1440x900x24 -ac -nolisten tcp -dpi 96 &
+
+# Función para verificar si el display está realmente activo
+check_display() {
+    # Verificar si hay un proceso Xvfb corriendo en display :1
+    if pgrep -f "Xvfb :1" > /dev/null 2>&1; then
+        # Verificar si el display realmente responde
+        if xset -display :1 q > /dev/null 2>&1; then
+            return 0  # Display activo y funcionando
+        else
+            return 1  # Proceso existe pero display no responde
+        fi
+    else
+        return 1  # No hay proceso Xvfb
+    fi
+}
+
+# Función para limpiar lock files huérfanos
+cleanup_display() {
+    if [ -f "/tmp/.X1-lock" ]; then
+        echo "[INFO] Limpiando lock file huérfano..."
+        sudo rm -f /tmp/.X1-lock
+    fi
+    if [ -S "/tmp/.X11-unix/X1" ]; then
+        echo "[INFO] Limpiando socket huérfano..."
+        sudo rm -f /tmp/.X11-unix/X1
+    fi
+}
+
+# Verificar estado del display
+if check_display; then
+    echo "[OK] Xvfb ya está corriendo y funcionando"
+else
+    # Si hay un lock file pero no hay proceso, limpiar
+    if [ -f "/tmp/.X1-lock" ] && ! pgrep -f "Xvfb :1" > /dev/null 2>&1; then
+        echo "[INFO] Encontrado lock file huérfano, limpiando..."
+        cleanup_display
+    fi
+    
+    # Matar cualquier proceso Xvfb zombie en display :1
+    pkill -f "Xvfb :1" > /dev/null 2>&1 || true
+    
+    # Esperar un momento para que se liberen los recursos
+    sleep 1
+    
+    # Iniciar Xvfb
+    echo "[INFO] Iniciando Xvfb..."
+    Xvfb :1 -screen 0 1440x900x24 -ac -nolisten tcp -dpi 96 > /dev/null 2>&1 &
+    
+    # Esperar a que se inicie
     sleep 2
+    
+    # Verificar que se inició correctamente
+    if check_display; then
+        echo "[OK] Xvfb iniciado correctamente"
+    else
+        echo "[ERROR] Falló al iniciar Xvfb"
+        exit 1
+    fi
 fi
+
+# Verificar y configurar VNC
 if ! pgrep -x "x11vnc" > /dev/null; then
-    x11vnc -display :1 -bg -forever -nopw -quiet -listen localhost -xkb
+    echo "[INFO] Iniciando VNC server..."
+    x11vnc -display :1 -bg -forever -nopw -quiet -listen localhost -xkb > /dev/null 2>&1
+    echo "[OK] VNC server iniciado"
+else
+    echo "[OK] VNC server ya está corriendo"
 fi
-echo "[OK] Display virtual listo - VNC: http://localhost:6080"
+
+echo "[OK] Display virtual configurado!"
+echo "DISPLAY=$DISPLAY"
+echo "VNC disponible en: http://localhost:6080"
 EOF
 
 # Script para iniciar IB Gateway
