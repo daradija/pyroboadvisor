@@ -7,3 +7,6 @@ scipy
 lxml
 fastapi
 pydantic
+ib_insync
+nest_asyncio
+pytz
