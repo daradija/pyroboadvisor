@@ -28,14 +28,19 @@ class DriverIB:
         return r
 
     def cash(self):
-        account=self.ib.accountSummary()
-        for a in account:
-            if a.tag == "TotalCashValue":
-                print(f"Total Cash Value: {a.value} {a.currency}")
-                if a.currency == "USD":
-                    return float(a.value)
-        print("No se encontró efectivo en USD en la cuenta.")
-        return 0.0
+        """Buscar efectivo en EUR y USD"""
+        account_summary = self.ib.accountSummary()
+        for item in account_summary:
+            if item.tag == 'TotalCashValue':
+                print(f"Total Cash Value: {item.value} {item.currency}")
+                # Priorizar EUR ya que tu cuenta está en EUR
+                if item.currency == 'EUR':
+                    return float(item.value)
+                elif item.currency == 'USD':
+                    return float(item.value)
+        
+        print("No se encontró efectivo en EUR ni USD en la cuenta.")
+        return 0.0  # Cambiar de 1000.1 a 0.0
     
     def clearOrders(self):
         # 1) Solicita las órdenes abiertas y deja que el event loop las procese
