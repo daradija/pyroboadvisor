@@ -1,5 +1,8 @@
 from datetime import datetime, date, timedelta
 import pandas as pd
+# Al inicio de evaluacion.py, agregar:
+import matplotlib
+matplotlib.use('Agg')  # Backend sin display
 import matplotlib.pyplot as plt
 
 class EstrategiaValuacionConSP500:
@@ -129,7 +132,8 @@ class EstrategiaValuacionConSP500:
                 )
             ultima = sub.iloc[-1]
             fecha_usada = ultima.name.date()
-            precio = float(ultima['Adj Close'] if 'Adj Close' in data.columns else ultima['Close'])
+            #precio = float(ultima['Adj Close'] if 'Adj Close' in data.columns else ultima['Close'])
+            precio = float(ultima['Adj Close'].iloc[0] if 'Adj Close' in data.columns else ultima['Close'].iloc[0])
             if fecha_usada != fecha:
                 print(f"Advertencia: para {fecha}, usando cotización SP500 de {fecha_usada}.")
             sp500_raw_list.append(precio)
