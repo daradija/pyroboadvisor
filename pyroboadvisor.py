@@ -118,6 +118,7 @@ class PyRoboAdvisor:
                 self.apalancamiento = float(input("Ingrese el apalancamiento: "))
             except ValueError:
                 print("Por favor, ingrese un número válido entre 0.0 y 1.8.")
+        p["apalancamiento"] = self.apalancamiento
 
         if self.tipo in ["1", "2", "3"]:
             # check valid time format HH:MM
