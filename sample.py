@@ -23,13 +23,13 @@ p={
     "email": "",
 }
 
-pra=PyRoboAdvisor(p,1000,"2025-07-09",{
-    "AAPL": 20,
-    "MSFT": 20,
-    "GOOGL": 20,
-})  
+# pra=PyRoboAdvisor(p,1000,"2025-07-09",{
+#     "AAPL": 20,
+#     "MSFT": 20,
+#     "GOOGL": 20,
+# })  
 
-# pra = PyRoboAdvisor(p)
+pra = PyRoboAdvisor(p)
 
 pra.readTickersFromWikipedia()
 pra.completeTickersWithIB()  # Completa los tickers de IB que no están en el SP500, para que pueda venderlos
