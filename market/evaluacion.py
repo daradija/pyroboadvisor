@@ -1,6 +1,30 @@
 from datetime import datetime, date, timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
+
+class SharpeLog:
+    def __init__(self):
+        # Para la media
+        self.sx=0
+        self.n=0
+        # Para la desviación estándar
+        self.s2x=0
+        self.previusX=None
+
+    def add(self, x):
+        if self.previusX!=None:
+            rlog=math.log(x/self.previusX)
+            self.sx += rlog
+            self.s2x += rlog * rlog
+            self.n += 1
+        self.previusX=x
+
+    def sharpeLog(self):
+        # media dividido por desviación
+        if self.n==0:
+            return 0.0
+        return self.sx/(self.n*math.sqrt(self.s2x/self.n))*252/math.sqrt(252) # Anualizado, asumiendo 252 días de trading al año
 
 class EstrategiaValuacionConSP500:
     def __init__(self, sp500_ticker='^GSPC', lookback_days=7):
@@ -13,6 +37,7 @@ class EstrategiaValuacionConSP500:
         self.valores_estrategia = []
         self.sp500_ticker = sp500_ticker
         self.lookback_days = lookback_days
+        self.sharpe_log= SharpeLog()
         try:
             import yfinance as yf
             self._yf = yf
@@ -39,6 +64,8 @@ class EstrategiaValuacionConSP500:
         """
         if valor_estrategia is None:
             return 
+        self.sharpe_log.add(valor_estrategia)
+        print(f"Sharpe Log (A/SP500): {self.sharpe_log.sharpeLog()/0.59:.2f}") # 0.59 es el Sharpe Log del SP500
         fecha_dt = self._parse_fecha(fecha)
         self.fechas.append(fecha_dt)
         self.valores_estrategia.append(float(valor_estrategia))

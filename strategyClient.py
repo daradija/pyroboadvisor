@@ -2,13 +2,15 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import warnings
-
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 class StrategyClient:
     def __init__(self,p):
         self.verify_ssl = True  
         api_url="https://pyroboadvisor.org"
         if self.verify_ssl is False:
+            print("WARNING: SSL verification is disabled. This is not recommended for production use.")
             api_url="https://localhost:443"
             warnings.filterwarnings(
                 "ignore",
@@ -16,11 +18,11 @@ class StrategyClient:
             )
         self.api_url = api_url.rstrip("/")
         # Create requests session to handle ConnectionError
-        self.requests_session = self.configure_requests_session(retries=3, backof_factor=0.5)
+        self.requests_session = self._configure_requests_session(retries=3, backof_factor=0.5)
         self.session_id = None
         self.create_session(p)
 
-    def configure_requests_session(self, retries: int, backof_factor: float) -> requests.Session:
+    def _configure_requests_session(self, retries: int, backof_factor: float) -> requests.Session:
         session = requests.Session()
         retry = Retry(connect=retries, backoff_factor=backof_factor)
         adapter = HTTPAdapter(max_retries=retry)
@@ -66,6 +68,7 @@ class StrategyClient:
         resp = self.requests_session.post(f"{self.api_url}/sessions/{self.session_id}/set_portfolio", json=payload, verify=self.verify_ssl)
         resp.raise_for_status()
         return resp.json()
+    
 
     # def program_orders(self, orders, simulator):
     #     # Utiliza el mismo simulador que el bucle original

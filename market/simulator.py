@@ -40,6 +40,26 @@ class Simulator:
         self.ddpp=DDPP(240)
         self.initialProgram=False
 
+    def set_portfolio(self, money, stocks):
+        self.money = money
+        self.stocks = np.array(stocks, dtype=np.float64)
+        
+    def clone(self):
+        new_simulator = Simulator(self.symbols, self.comisionFija)
+        new_simulator.money = self.money
+        new_simulator.stocks = np.copy(self.stocks)
+        new_simulator.pBuy = np.copy(self.pBuy)
+        new_simulator.amount = np.copy(self.amount)
+        new_simulator.pSell = np.copy(self.pSell)
+        new_simulator.numberOfStocksInPortfolio = self.numberOfStocksInPortfolio
+        new_simulator.initial = self.initial
+        new_simulator.comisionFija = self.comisionFija
+        new_simulator.comision = self.comision
+        new_simulator.totalComision = self.totalComision
+        new_simulator.initialProgram = self.initialProgram
+        new_simulator.ddpp = None
+        return new_simulator
+
     def programBuy(self, id, price, amount):
         self.pBuy[id]= price
         self.amount[id] = amount
@@ -98,6 +118,9 @@ class Simulator:
         for i in self.stockIndex():
             print(self.symbols[i]+"/"+str(self.stocks[i]), end=" ")
 
+        if self.ddpp is None:
+            return tasacion
+
         ddpp1,ddpp2= self.ddpp.add(tasacion)
 
         print()
@@ -106,6 +129,9 @@ class Simulator:
         tae= (tasacion / self.initialMoney)**(365/days) - 1
         print("TAE: {:.2%}".format(tae), end=" ")
         print("DDPP: {:.2%}/{:.2%}".format(ddpp1, ddpp2), end=" ")
+        self.tae= tae
+        self.ddpp1=ddpp1
+        self.ddpp2=ddpp2
 
 
         if tasacion<-self.money:
