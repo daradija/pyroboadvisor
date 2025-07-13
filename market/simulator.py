@@ -27,7 +27,7 @@ class Simulator:
     def __init__(self,symbols,comisionFija=0.0035+(0.000166+0.000022)-0.002):
         self.money = 0
         size=len(symbols)
-        self.stocks=np.zeros(size, dtype=np.int16)
+        self.stocks=np.zeros(size, dtype=np.int64)
         self.pBuy=np.zeros(size)
         self.amount=np.zeros(size)
         self.pSell=np.zeros(size)
@@ -61,7 +61,7 @@ class Simulator:
         return new_simulator
 
     def programBuy(self, id, price, amount):
-        self.pBuy[id]= price
+        self.pBuy[int(id)]= price
         self.amount[id] = amount
         self.initialProgram = True
 
@@ -85,8 +85,10 @@ class Simulator:
         buy1=low2<self.pBuy 
         buy2=self.pBuy<high2
         buy=buy1 & buy2
-        intBuy=np.array(self.amount/self.pBuy, dtype=np.int16)
+        intBuy=np.array(self.amount/self.pBuy, dtype=np.int64)
         self.stocks+=np.where(self.pBuy==0,0,buy*intBuy)
+        if np.any(self.stocks<0):
+            print("Error: Negative stocks in portfolio")
         self.money-=np.sum(buy*intBuy*self.pBuy)
 
         self.comision= np.sum(buy*intBuy*self.comisionFija)
@@ -96,6 +98,8 @@ class Simulator:
         sell2=self.pSell<high2
         sell=sell1 & sell2
         self.stocks=np.where(sell,0,self.stocks)
+        if np.any(self.stocks<0):
+            print("Error: Negative stocks in portfolio after sell")
         self.money+=np.sum(sell*self.amount)
 
         self.comision+= np.sum(sell*self.amount*self.comisionFija)
@@ -136,6 +140,7 @@ class Simulator:
 
         if tasacion<-self.money:
             print("Quebrado")
+        self.tasacion = tasacion
         return tasacion
 
     def stockIndex(self):

@@ -12,7 +12,7 @@ import shutil
 import time
 
 class PyRoboAdvisor:
-    def __init__(self, p,cash=None,date=None,posiciones=None):
+    def __init__(self, p,cash=None,date=None,posiciones=None,program=None):
         self.p = p
         self.d=None
 
@@ -40,6 +40,12 @@ class PyRoboAdvisor:
                 "email": email,
                 "key": key
             }
+
+        if program!=None:
+            self.tipo="0"
+            self.verGrafica=False
+            p["apalancamiento"] = config["apalancamiento"]
+            return 
 
         # Tipo de operatoria
         print("\nModo: ")
