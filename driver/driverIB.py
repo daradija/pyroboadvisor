@@ -9,9 +9,17 @@ class DriverIB:
         self.puerto = puerto
         self.ib = None
 
-    def conectar(self):
+    def conectar(self, desatendido=False):
         self.ib=IB()
-        self.ib.connect('127.0.0.1', self.puerto, clientId=1)
+        if desatendido:
+            while True:
+                try:
+                    self.ib.connect('127.0.0.1', self.puerto, clientId=1)
+                except Exception as e:
+                    print(f"Error conectando a IB: {e}. Reintentando en 5 segundos...")
+                    time.sleep(5)
+        else:
+            self.ib.connect('127.0.0.1', self.puerto, clientId=1)
 
     def portfolio(self,symbols):
         ps=self.ib.portfolio()
