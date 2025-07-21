@@ -1,0 +1,19 @@
+# Copia este fichero a la carpeta private con el nombre pyroboadvisor.config
+# En caso que el archivo exista, el programa no interacciona con el usuario y funciona de forma desatendida
+fecha_inicio=2019-01-01
+money=100000
+numberStocksInPortfolio=10
+orderMarginBuy=0.005
+orderMarginSell=0.005
+apalancamiento=1.7
+ring_size=252
+rlog_size=22
+cabeza=5
+seeds=100
+percentil=95
+prediccion=1
+key=
+email=
+modo=3 # 0: solo simulacion, 1: manual, 2: leer IB + manual, 3: leer IB + escribir IB
+hora=10:00
+puerto=4001 # 4001: live, 4002: paper en ibgateway

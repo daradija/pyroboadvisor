@@ -1,4 +1,3 @@
-
 from market.source import Source
 from market.sourcePerDay import SourcePerDay
 import numpy as np
@@ -12,22 +11,24 @@ import shutil
 import time
 
 class PyRoboAdvisor:
-    def __init__(self, p,cash=None,date=None,posiciones=None,program=None):
+    def __init__(self, p, cash=None, date=None, posiciones=None, program=None):
         self.p = p
-        self.d=None
+        self.d = None
+
+        desatendido = p.get("desatendido", False)
 
         # si no tiene usuario ni contraseña los pregunta y mete en config.json y p
-        # Leey config.json si existe
+        # Lee config.json si existe
         try:
             with open("config.json", "r") as f:
                 config = json.load(f)
-                if p["email"]=="" or p["key"]=="":
+                if p["email"] == "" or p["key"] == "":
                     p["email"] = config.get("email", "")
                     p["key"] = config.get("key", "")
         except FileNotFoundError:
             config = {}
 
-        if p["email"]=="" or p["key"]=="":            
+        if (p["email"] == "" or p["key"] == "") and not desatendido:
             print("Debe ingresar su email y key para operar con PyRoboAdvisor.")
             print("Para obtener una key, visite https://pyroboadvisor.com")
             email = input("Email: ").strip()
@@ -47,49 +48,55 @@ class PyRoboAdvisor:
             p["apalancamiento"] = config["apalancamiento"]
             return 
 
-        # Tipo de operatoria
-        print("\nModo: ")
-        print(" 0. Solo simulación")
-        print(" 5. Purgar caché")
-        print()
-        print(" Operar con broker:")
-        print("  1. Manual")
-        print("  2. Leer IB + Manual")
-        print("  3. Leer IB + Escribir IB")
-        print("  4. Igual que el último día que operé")
-        #print("  5. Cambio de driver (no implementado)")
-        self.tipo = ""
-        while self.tipo not in ["0", "1", "2", "3", "4"]:
-            self.tipo = input("Seleccione una opción (1/2/3/4/5): ").strip()
-            if self.tipo == "5":
-                try:
-                    shutil.rmtree("../cache")
-                    print("Caché purgada.")
-                except Exception as e:
-                    print(f"Error al purgar la caché: {e}")
-
-        if self.tipo == "4":
-            self.tipo=config["tipo"]
-            self.hora= config["hora"]
-            self.apalancamiento= config["apalancamiento"]
+        if desatendido:
+            self.tipo = str(p.get("tipo", "0"))
+            self.hora = p.get("hora", "10:00")
+            self.apalancamiento = float(p.get("apalancamiento", 1.0))
+            self.verGrafica = False 
         else:
-            self.hora = None
-            self.apalancamiento=None
+            # Tipo de operatoria
+            print("\nModo: ")
+            print(" 0. Solo simulación")
+            print(" 5. Purgar caché")
+            print()
+            print(" Operar con broker:")
+            print("  1. Manual")
+            print("  2. Leer IB + Manual")
+            print("  3. Leer IB + Escribir IB")
+            print("  4. Igual que el último día que operé")
+            #print("  5. Cambio de driver (no implementado)")
+            self.tipo = ""
+            while self.tipo not in ["0", "1", "2", "3", "4"]:
+                self.tipo = input("Seleccione una opción (1/2/3/4/5): ").strip()
+                if self.tipo == "5":
+                    try:
+                        shutil.rmtree("../cache")
+                        print("Caché purgada.")
+                    except Exception as e:
+                        print(f"Error al purgar la caché: {e}")
 
-        if self.tipo in ["1"]:
-            stoday = str(pd.Timestamp.now().normalize())[:10]
-            if cash is None or posiciones is None or date != stoday:
-                print("\nDebes incluir el dinero disponible, fecha de hoy, y las posiciones de cartera en la llamada (sample.py)")
-                print("\npra=PyRoboAdvisor(p,1000,\""+stoday+"\",{\n"+
-                "\t\"AAPL\": 20,\n"+
-                "\t\"MSFT\": 20,\n"+
-                "\t\"GOOGL\": 20,\n"+
-                "})\n")
+            if self.tipo == "4":
+                self.tipo=config["tipo"]
+                self.hora= config["hora"]
+                self.apalancamiento= config["apalancamiento"]
+            else:
+                self.hora = None
+                self.apalancamiento=None
 
-                # halt, exit
-                sys.exit()
-            self.cash = cash
-            self.posiciones = posiciones
+            if self.tipo in ["1"]:
+                stoday = str(pd.Timestamp.now().normalize())[:10]
+                if cash is None or posiciones is None or date != stoday:
+                    print("\nDebes incluir el dinero disponible, fecha de hoy, y las posiciones de cartera en la llamada (sample.py)")
+                    print("\npra=PyRoboAdvisor(p,1000,\""+stoday+"\",{\n"+
+                    "\t\"AAPL\": 20,\n"+
+                    "\t\"MSFT\": 20,\n"+
+                    "\t\"GOOGL\": 20,\n"+
+                    "})\n")
+
+                    # halt, exit
+                    sys.exit()
+                self.cash = cash
+                self.posiciones = posiciones
 
         if self.tipo in ["1", "2", "3", "4"]:
             # Ajusta la fecha de incio y fin
@@ -101,8 +108,7 @@ class PyRoboAdvisor:
             self.p["fecha_fin"] = stoday
 
         # Pregunta si desea ver una gráfica
-        self.verGrafica = False
-        if self.tipo == "0":
+        if not desatendido and self.tipo == "0":
             self.verGrafica = None
             while self.verGrafica not in [True, False]:
                 respuesta = input("¿Deseas ver una gráfica de la simulación? (s/n): ").strip().lower()
@@ -112,21 +118,22 @@ class PyRoboAdvisor:
                     self.verGrafica = False
 
         # apalancamiento
-        print("\nApalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.")
-        print("Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.")
-        print("Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.")
-        print(" 0   No compres hoy")
-        print(" 0.2 Usa el 20% del cash")
-        print(" 1   Usar todo el dinero disponible")
-        print(" 1.7 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia")
-        while self.apalancamiento is None or not (0 <= self.apalancamiento <= 1.8):
-            try:
-                self.apalancamiento = float(input("Ingrese el apalancamiento: "))
-            except ValueError:
-                print("Por favor, ingrese un número válido entre 0.0 y 1.8.")
-        p["apalancamiento"] = self.apalancamiento
+        if not desatendido:
+            print("\nApalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.")
+            print("Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.")
+            print("Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.")
+            print(" 0   No compres hoy")
+            print(" 0.2 Usa el 20% del cash")
+            print(" 1   Usar todo el dinero disponible")
+            print(" 1.7 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia")
+            while self.apalancamiento is None or not (0 <= self.apalancamiento <= 1.8):
+                try:
+                    self.apalancamiento = float(input("Ingrese el apalancamiento: "))
+                except ValueError:
+                    print("Por favor, ingrese un número válido entre 0.0 y 1.8.")
+            p["apalancamiento"] = self.apalancamiento
 
-        if self.tipo in ["1", "2", "3"]:
+        if not desatendido and self.tipo in ["1", "2", "3"]:
             # check valid time format HH:MM
             while not self.hora or not self.hora.count(":") == 1 or not all(part.isdigit() for part in self.hora.split(":")) or not (0 <= int(self.hora.split(":")[0]) < 24) or not (0 <= int(self.hora.split(":")[1]) < 60):
                 self.hora = input("\nA que hora US deseas entrar a operar? (Ej: 10:00 a 12:00) (HH:MM): ")
@@ -136,7 +143,7 @@ class PyRoboAdvisor:
                 self.hora = "0" + self.hora
         
         # guardar en config.json
-        if self.tipo in ["1","2","3"]:
+        if not desatendido and self.tipo in ["1", "2", "3"]:
             with open("config.json", "w") as f:
                 config["hora"] = self.hora
                 config["apalancamiento"] = self.apalancamiento
@@ -229,7 +236,7 @@ class PyRoboAdvisor:
         """
         if self.tipo in ["2","3"]: # IB
             from driver.driverIB import DriverIB as Driver
-            d=Driver(7497)
+            d=Driver(self.p["puerto"])
             d.conectar()
             d.completeTicketsWithIB(self.tickers)
             self.d=d
@@ -237,7 +244,7 @@ class PyRoboAdvisor:
     def autoIB(self):
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
-            self.d=Driver(7497)
+            self.d=Driver(self.p["puerto"])
             self.d.conectar()
 
         d=self.d
@@ -272,7 +279,7 @@ class PyRoboAdvisor:
     def manualIB(self):
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
-            self.d=Driver(7497)
+            self.d=Driver(self.p["puerto"])
             self.d.conectar()
         d=self.d
 

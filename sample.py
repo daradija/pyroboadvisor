@@ -1,33 +1,8 @@
-
 from pyroboadvisor import PyRoboAdvisor
-import pandas as pd
+from config_utils import get_parameters
 
-today = pd.Timestamp.now().normalize()
-stoday = today.strftime("%Y-%m-%d")
-p={
-    "fecha_inicio": "2019-01-01",
-    "fecha_fin": stoday,
-    "money": 100000,
-    "numberStocksInPortfolio": 10,
-    "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
-    "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
-    "apalancamiento": 1.7,  # apalancamiento de las compras
-    "ring_size": 252,
-    "rlog_size": 22,
-    "cabeza": 5,
-    "seeds": 100,
-    "percentil": 95,
-    "prediccion": 1,
-
-    "key": "",
-    "email": "",
-}
-
-# pra=PyRoboAdvisor(p,1000,"2025-07-09",{
-#     "AAPL": 20,
-#     "MSFT": 20,
-#     "GOOGL": 20,
-# })  
+config_path = "private/pyroboadvisor.config"
+p = get_parameters(config_path)
 
 pra = PyRoboAdvisor(p)
 
