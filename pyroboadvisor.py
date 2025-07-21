@@ -245,7 +245,14 @@ class PyRoboAdvisor:
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
             self.d=Driver(self.p["puerto"])
-            self.d.conectar()
+            if self.p.get("desatendido", False):
+                try:
+                    self.d.conectar()
+                except Exception as e:
+                    print(f"Error conectando a IB: {e}. Reintentando en 5 segundos...")
+                    time.sleep(5)
+            else:
+                self.d.conectar()
 
         d=self.d
 
