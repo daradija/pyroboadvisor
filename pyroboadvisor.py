@@ -237,7 +237,8 @@ class PyRoboAdvisor:
         if self.tipo in ["2","3"]: # IB
             from driver.driverIB import DriverIB as Driver
             d=Driver(self.p["puerto"])
-            d.conectar()
+            desatendido = self.p.get("desatendido", False)
+            d.conectar(desatendido)
             d.completeTicketsWithIB(self.tickers)
             self.d=d
         
@@ -281,7 +282,8 @@ class PyRoboAdvisor:
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
             self.d=Driver(self.p["puerto"])
-            self.d.conectar()
+            desatendido = self.p.get("desatendido", False)
+            self.d.conectar(desatendido)
         d=self.d
 
         cash= d.cash()
