@@ -12,9 +12,11 @@ class DriverIB:
     def conectar(self, desatendido=False):
         self.ib=IB()
         if desatendido:
-            while True:
+            reintenta = True
+            while reintenta:
                 try:
                     self.ib.connect('127.0.0.1', self.puerto, clientId=1)
+                    reintenta = False
                 except Exception as e:
                     print(f"Error conectando a IB: {e}. Reintentando en 5 segundos...")
                     time.sleep(5)
