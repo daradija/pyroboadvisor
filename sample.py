@@ -1,7 +1,9 @@
+import os
 from pyroboadvisor import PyRoboAdvisor
 from config_utils import get_parameters
 
-config_path = "private/pyroboadvisor.config"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(script_dir, "private", "pyroboadvisor.config")
 p = get_parameters(config_path)
 
 pra = PyRoboAdvisor(p)
