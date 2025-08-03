@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+import numpy as np
 
 class SharpeLog:
     def __init__(self):
@@ -24,7 +25,10 @@ class SharpeLog:
         # media dividido por desviación
         if self.n==0:
             return 0.0
-        return self.sx/(self.n*math.sqrt(self.s2x/self.n))*252/math.sqrt(252) # Anualizado, asumiendo 252 días de trading al año
+        denominador=self.n*math.sqrt(self.s2x/self.n)
+        if denominador==0:
+            return 0.0
+        return self.sx/denominador*252/math.sqrt(252) # Anualizado, asumiendo 252 días de trading al año
 
 class EstrategiaValuacionConSP500:
     def __init__(self, sp500_ticker='^GSPC', lookback_days=7):
@@ -170,7 +174,7 @@ class EstrategiaValuacionConSP500:
 
         # Graficar ambas series
         plt.figure()
-        plt.plot(fechas_ord, valores_ord, label='Estrategia A1')
+        plt.plot(fechas_ord, valores_ord, label='Estrategia A2')
         plt.plot(fechas_ord, sp500_escalada, label='S&P 500 escalado', linestyle='--')
         plt.xlabel('Fecha')
         plt.ylabel('Valor')
@@ -179,4 +183,40 @@ class EstrategiaValuacionConSP500:
         plt.grid(True)
         plt.tight_layout()
         plt.show()
+
+        self.dotComparativo(valores_ord, sp500_raw_list)
+
+    def dotComparativo(self, valores_estrategia, sp500_raw_list):
+        # cacula rentabilidad logaritmica
+        valores_estrategia_log = np.array([math.log(v) for v in valores_estrategia])
+        sp500_raw_list_log = np.array([math.log(v) for v in sp500_raw_list])
+
+        # Pasa a rentabilidad logaritmica
+        valores_r_log= np.diff(valores_estrategia_log)
+        sp500_r_log = np.diff(sp500_raw_list_log)
+
+        # muestra grafica de dispersión
+        plt.figure()
+        plt.scatter(sp500_r_log, valores_r_log, alpha=0.5)
+        plt.xlabel('Rentabilidad logarítmica S&P 500')
+        plt.ylabel('Rentabilidad logarítmica Estrategia')
+        plt.title('Dispersión: Estrategia A1 vs S&P 500')
+        plt.grid(True)
+        # Regresión lineal
+        m, b = np.polyfit(sp500_r_log, valores_r_log, 1)
+        plt.plot(sp500_r_log, m * sp500_r_log + b, color='red', linestyle='--', label='Regresión lineal')
+        # Calcular y mostrar coeficiente de correlación
+        correlation = np.corrcoef(sp500_r_log, valores_r_log)[0, 1]
+        plt.text(0.05, 0.90, f'Correlación: {correlation:.2f}', transform=plt.gca().transAxes, fontsize=10,
+                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
+        # Calcular y mostrar la ecuación de la recta
+        plt.text(0.05, 1, f'y = {m:.4f}x + {b:.4f}', transform=plt.gca().transAxes, fontsize=10,
+                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
+        # Mostrar leyenda y ajustar layout
+        plt.axhline(0, color='black', linewidth=0.8, linestyle='--')
+        plt.axvline(0, color='black', linewidth=0.8, linestyle='--')
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+        print()
 
