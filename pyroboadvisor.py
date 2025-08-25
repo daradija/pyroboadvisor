@@ -10,6 +10,48 @@ import sys
 import shutil
 import time
 
+import pandas as pd
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+def read_html_like(url, *, headers=None, cookies=None, timeout=30, **pd_kwargs):
+    """
+    Devuelve la misma lista de DataFrames que pd.read_html(url),
+    pero hace la petición HTTP con cabeceras/cookies y reintentos.
+
+    pd_kwargs se pasa a pandas.read_html (match, flavor, attrs, converters, etc.).
+    """
+    default_headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "es-ES,es;q=0.9",
+        "Referer": url,
+    }
+    if headers:
+        default_headers.update(headers)
+
+    # Sesión con reintentos (maneja 429/5xx)
+    retry = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+    sess = requests.Session()
+    sess.mount("http://", HTTPAdapter(max_retries=retry))
+    sess.mount("https://", HTTPAdapter(max_retries=retry))
+
+    resp = sess.get(url, headers=default_headers, cookies=cookies, timeout=timeout)
+    resp.raise_for_status()  # lanza si 4xx/5xx
+
+    # Asegura codificación correcta
+    if not resp.encoding:
+        resp.encoding = resp.apparent_encoding
+
+    # Igual que pd.read_html(url), pero usando el HTML ya descargado
+    # Puedes pasar kwargs como match=..., flavor="lxml", attrs={...}, etc.
+    return pd.read_html(resp.text, **pd_kwargs)
+
 class PyRoboAdvisor:
     def __init__(self, p, cash=None, date=None, posiciones=None, program=None):
         self.p = p
@@ -25,7 +67,10 @@ class PyRoboAdvisor:
                 if p["email"] == "" or p["key"] == "":
                     p["email"] = config.get("email", "")
                     p["key"] = config.get("key", "")
-        except FileNotFoundError:
+                if not program is None and program.get("email","")!="" and program.get("key","")!="":
+                    p["email"]=program["email"]
+                    p["key"]=program["key"]
+        except:
             config = {}
 
         if (p["email"] == "" or p["key"] == "") and not desatendido:
@@ -43,9 +88,12 @@ class PyRoboAdvisor:
             }
 
         if program!=None:
-            self.tipo="0"
+            self.tipo=program.get("tipo","0")
             self.verGrafica=False
-            p["apalancamiento"] = config["apalancamiento"]
+            for k,v in program.items():
+                p[k]=v
+            if self.tipo>"0":
+                self.hora= program["hora"]
             return 
 
         if desatendido:
@@ -149,30 +197,47 @@ class PyRoboAdvisor:
                 config["apalancamiento"] = self.apalancamiento
                 config["tipo"] = self.tipo
                 json.dump(config, f)
+        #self.p=config
+        self.p["polygon_key"] = config.get("polygon_key", "")
+        self.p["source"] = config.get("source", 0)
 
     def readTickersFromWikipedia(self):
         # Leer la tabla de Wikipedia
         url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-        tablas = pd.read_html(url)
+        tablas = read_html_like(url)
         sp500 = tablas[0]  # La primera tabla es la que contiene la información
 
         # Obtener la columna de los símbolos/tickers
-        tickers = sp500['Symbol'].tolist()
+        # Aportación de @Tomeu
+        tickers = sp500['Symbol'].str.replace('.', '-').tolist()
         # sort 
         tickers.sort()
         self.tickers = tickers
+        if self.p.get("source",0)==0:
+            pass
+        else:
+            from market.sourcePerDayPolygon import SourcePerDay
+            self.sp= SourcePerDay(self.p)
+            #self.tickers = self.sp.symbols
+
+            self.sp.symbols = tickers
+            self.sp.size = len(tickers)
 
 
     def prepare(self):
         p=self.p
-        self.source=Source(
-            lista_instrumentos=self.tickers,
-            fecha_inicio=p["fecha_inicio"],
-            fecha_fin=p["fecha_fin"],
-            intervalo="1d"
-        )
+        if self.p.get("source",0)==0:
+            self.source=Source(
+                lista_instrumentos=self.tickers,
+                fecha_inicio=p["fecha_inicio"],
+                fecha_fin=p["fecha_fin"],
+                intervalo="1d"
+            )
 
-        self.sp=SourcePerDay(self.source)
+            self.sp=SourcePerDay(self.source)
+        else:
+            self.sp.setDateRange(p["fecha_inicio"], p["fecha_fin"])
+
         p["tickers"]=self.sp.symbols
 
         simulator=Simulator(self.sp.symbols)
@@ -188,10 +253,17 @@ class PyRoboAdvisor:
         while True:
             orders=self.s.open(self.sp.open)
             for order in orders["programBuy"]:
+                if order["price"]==0:
+                    continue
                 simulator.programBuy(order["id"], order["price"], order["amount"])
             for order in orders["programSell"]:
+                if order["price"]==0:
+                    continue
                 simulator.programSell(order["id"], order["price"], order["amount"])
-            self.s.execute(self.sp.low, self.sp.high, self.sp.close, self.sp.current)
+            if hasattr(self.sp, "volume"):
+                self.s.execute(self.sp.low,  self.sp.high, self.sp.close, self.sp.current, volume=self.sp.volume)
+            else:
+                self.s.execute(self.sp.low, self.sp.high, self.sp.close, self.sp.current)
             tasacion=simulator.execute(self.sp.low, self.sp.high, self.sp.close, self.sp.current)
             ev.add(self.sp.current, tasacion)
             hay=self.sp.nextDay()

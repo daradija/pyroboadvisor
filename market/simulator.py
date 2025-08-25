@@ -39,6 +39,9 @@ class Simulator:
         self.totalComision=0
         self.ddpp=DDPP(240)
         self.initialProgram=False
+        self.apalancamientoMax=0
+        self.apalancamientoNum=0
+        self.apalancamientoDen=0
 
     def set_portfolio(self, money, stocks):
         self.money = money
@@ -85,7 +88,8 @@ class Simulator:
         buy1=low2<self.pBuy 
         buy2=self.pBuy<high2
         buy=buy1 & buy2
-        intBuy=np.array(self.amount/self.pBuy, dtype=np.int64)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            intBuy=np.array(self.amount/self.pBuy, dtype=np.int64)
         self.stocks+=np.where(self.pBuy==0,0,buy*intBuy)
         if np.any(self.stocks<0):
             print("Error: Negative stocks in portfolio")
@@ -116,6 +120,11 @@ class Simulator:
 
         # Tasación
         tasacion=self.money+ np.sum(self.stocks*close)
+        apalancamientoCur=1-self.money/tasacion
+        self.apalancamientoMax= max(self.apalancamientoMax, apalancamientoCur) 
+        if tasacion!=self.money:
+            self.apalancamientoNum+=apalancamientoCur
+            self.apalancamientoDen+=1
         self.numberOfStocksInPortfolio = np.count_nonzero(self.stocks)
         print(str(date)[:11]+"Value: $"+str(int(tasacion)),end=" ")
         print("$"+str(int(self.money)), end=" ")
@@ -132,14 +141,14 @@ class Simulator:
         days=period.days + period.seconds/86400+1
         tae= (tasacion / self.initialMoney)**(365/days) - 1
         print("TAE: {:.2%}".format(tae), end=" ")
-        print("DDPP: {:.2%}/{:.2%}".format(ddpp1, ddpp2), end=" ")
+        print("DDPP: {:.2%}/{:.2%}".format(ddpp1, ddpp2),"Apalancamiento: {:.2}/{:.2}".format(self.apalancamientoNum/self.apalancamientoDen, self.apalancamientoMax),end=" ")
         self.tae= tae
         self.ddpp1=ddpp1
         self.ddpp2=ddpp2
 
 
-        if tasacion<-self.money:
-            print("Quebrado")
+        # if tasacion<-self.money:
+        #     print("Quebrado")
         self.tasacion = tasacion
         return tasacion
 
