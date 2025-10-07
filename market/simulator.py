@@ -101,7 +101,10 @@ class Simulator:
         sell1=low2<self.pSell 
         sell2=self.pSell<high2
         sell=sell1 & sell2
-        self.stocks=np.where(sell,0,self.stocks)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            intSell=np.array(self.amount/self.pSell, dtype=np.int64)
+        self.stocks-=np.where(self.pSell==0,0,sell*intSell)
+        self.stocks=np.where((self.stocks<1) & (self.stocks>-1),0,self.stocks)
         if np.any(self.stocks<0):
             print("Error: Negative stocks in portfolio after sell")
         self.money+=np.sum(sell*self.amount)
@@ -141,7 +144,8 @@ class Simulator:
         days=period.days + period.seconds/86400+1
         tae= (tasacion / self.initialMoney)**(365/days) - 1
         print("TAE: {:.2%}".format(tae), end=" ")
-        print("DDPP: {:.2%}/{:.2%}".format(ddpp1, ddpp2),"Apalancamiento: {:.2}/{:.2}".format(self.apalancamientoNum/self.apalancamientoDen, self.apalancamientoMax),end=" ")
+        if self.apalancamientoDen>0:
+            print("DDPP: {:.2%}/{:.2%}".format(ddpp1, ddpp2),"Apalancamiento: {:.2}/{:.2}".format(self.apalancamientoNum/self.apalancamientoDen, self.apalancamientoMax),end=" ")
         self.tae= tae
         self.ddpp1=ddpp1
         self.ddpp2=ddpp2

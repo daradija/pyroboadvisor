@@ -174,7 +174,7 @@ class EstrategiaValuacionConSP500:
 
         # Graficar ambas series
         plt.figure()
-        plt.plot(fechas_ord, valores_ord, label='Estrategia A2')
+        plt.plot(fechas_ord, valores_ord, label='Estrategia B2')
         plt.plot(fechas_ord, sp500_escalada, label='S&P 500 escalado', linestyle='--')
         plt.xlabel('Fecha')
         plt.ylabel('Valor')
