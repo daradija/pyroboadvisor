@@ -382,7 +382,7 @@ class PyRoboAdvisor:
                 break
 
         if self.verGrafica:
-            ev.print()
+            ev.print(self.s.name)
 
     def manual(self, cash, portfolio):
         portfolio2=[0]*len(self.sp.symbols)
