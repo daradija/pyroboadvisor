@@ -74,7 +74,7 @@ class EstrategiaValuacionConSP500:
         self.fechas.append(fecha_dt)
         self.valores_estrategia.append(float(valor_estrategia))
 
-    def print(self):
+    def print(self, strategy_name):
         """
         Dibuja la serie de estrategia y la del S&P 500 escalada.
         Obtiene la cotización del S&P 500 en el rango de fechas usadas.
@@ -174,7 +174,7 @@ class EstrategiaValuacionConSP500:
 
         # Graficar ambas series
         plt.figure()
-        plt.plot(fechas_ord, valores_ord, label='Estrategia B2')
+        plt.plot(fechas_ord, valores_ord, label='Estrategia '+strategy_name)
         plt.plot(fechas_ord, sp500_escalada, label='S&P 500 escalado', linestyle='--')
         plt.xlabel('Fecha')
         plt.ylabel('Valor')
@@ -184,9 +184,9 @@ class EstrategiaValuacionConSP500:
         plt.tight_layout()
         plt.show()
 
-        self.dotComparativo(valores_ord, sp500_raw_list)
+        self.dotComparativo(valores_ord, sp500_raw_list, strategy_name)
 
-    def dotComparativo(self, valores_estrategia, sp500_raw_list):
+    def dotComparativo(self, valores_estrategia, sp500_raw_list,strategy_name):
         # cacula rentabilidad logaritmica
         valores_estrategia_log = np.array([math.log(v) for v in valores_estrategia])
         sp500_raw_list_log = np.array([math.log(v) for v in sp500_raw_list])
@@ -200,7 +200,7 @@ class EstrategiaValuacionConSP500:
         plt.scatter(sp500_r_log, valores_r_log, alpha=0.5)
         plt.xlabel('Rentabilidad logarítmica S&P 500')
         plt.ylabel('Rentabilidad logarítmica Estrategia')
-        plt.title('Dispersión: Estrategia A1 vs S&P 500')
+        plt.title(f'Dispersión: Estrategia "{strategy_name}" vs S&P 500')
         plt.grid(True)
         # Regresión lineal
         m, b = np.polyfit(sp500_r_log, valores_r_log, 1)
