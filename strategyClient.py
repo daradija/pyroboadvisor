@@ -88,7 +88,7 @@ class StrategyClient:
         resp.raise_for_status()
         resp_json=resp.json()
         self.session_id = resp_json["session_id"]
-        self.name = resp_json.get("name", "")
+        self.name = resp_json.get("strategy_name", "")
         if config.get("index",None) is not None:
             self.tickers = resp_json.get("tickers", [])
 

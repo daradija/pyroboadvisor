@@ -451,7 +451,10 @@ class PyRoboAdvisor:
 
         self.s.set_portfolio(cash, portfolio)
 
-        orders=self.s.open(rt,[sm(self.sp.current) for sm in self.signoMultiplexado])
+        if self.signoMultiplexado is None:
+            orders=self.s.open(rt)
+        else:
+            orders=self.s.open(rt,[sm(self.sp.current) for sm in self.signoMultiplexado])
 
         d.clearOrders()
 
