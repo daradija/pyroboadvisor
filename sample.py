@@ -16,7 +16,7 @@ p={
     "rlog_size": 22,
     "cabeza": 5,
     "seeds": 1000,
-    "percentil": 95,
+    "percentil": 90,
     "prediccion": 1,
     "multiploMantenimiento": 6,
 
