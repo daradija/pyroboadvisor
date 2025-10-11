@@ -11,11 +11,11 @@ p={
     "numberStocksInPortfolio": 10,
     "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
     "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
-    "apalancamiento": 1.7,  # apalancamiento de las compras
+    "apalancamiento": 1.6,  # apalancamiento de las compras
     "ring_size": 252,
     "rlog_size": 22,
     "cabeza": 5,
-    "seeds": 100,
+    "seeds": 1000,
     "percentil": 95,
     "prediccion": 1,
     "multiploMantenimiento": 6,
