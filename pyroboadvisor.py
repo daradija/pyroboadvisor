@@ -156,6 +156,9 @@ class PyRoboAdvisor:
             self.hora = p.get("hora", "10:00")
             self.apalancamiento = float(p.get("apalancamiento", 1.0))
             self.verGrafica = False 
+            config["source"] = p.get("source", 0)
+            config["eodhd_key"] = p.get("eodhd_key", "")
+            config["polygon_key"] = p.get("polygon_key", "")
         else:
             config["source"] = config.get("source", 0)     
             # Tipo de operatoria

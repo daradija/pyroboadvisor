@@ -44,6 +44,14 @@ def get_parameters(config_path):
                 "hora": config.get("hora", "10:00"),
                 "puerto": int(config.get("puerto", 7467)),
                 "desatendido": True,
+                "source": int(config.get("source", 0)),
+                "eodhd_key": config.get("eodhd_key", ""),
+                "polygon_key": config.get("polygon_key", ""),
+                "har": int(config.get("har", 1)),
+                "hretorno": int(config.get("hretorno", 1)),
+                "hrandom": int(config.get("hrandom", 1)),
+                "multiploMantenimiento": int(config.get("multiploMantenimiento", 6)),
+                "b": config.get("b", "True").lower() in ("true", "1", "yes"),                
             }
             use_config = True
         except Exception as e:
@@ -62,12 +70,20 @@ def get_parameters(config_path):
             "ring_size": 252,
             "rlog_size": 22,
             "cabeza": 5,
-            "seeds": 100,
-            "percentil": 95,
+            "seeds": 1000,
+            "percentil": 90,
             "prediccion": 1,
+            "har":1,
+            "hretorno":1,
+            "hrandom":1,
+            "multiploMantenimiento": 6,
             "key": "",
             "email": "",
             "puerto": 7467,
             "desatendido": False,
+            "source": 0,
+            "eodhd_key": "",
+            "polygon_key": "",
+            "b": True,
         }
     return p
