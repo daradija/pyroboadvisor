@@ -18,7 +18,8 @@ def disk_cache(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # Crear la carpeta de cache si no existe
-        cache_dir = "../cache"
+        
+        cache_dir=args[0].cache
         os.makedirs(cache_dir, exist_ok=True)
         
         # Crear el hash y el nombre del archivo
@@ -51,7 +52,10 @@ class Source:
         "1mo": None,
     }
 
-    def __init__(self, lista_instrumentos, fecha_inicio, fecha_fin, intervalo):
+    name="Yahoo Finance"
+
+    def __init__(self, p,cache, lista_instrumentos, fecha_inicio, fecha_fin, intervalo):
+        self.cache=cache
         self.lista_instrumentos = lista_instrumentos
         self.fecha_inicio = fecha_inicio
         self.fecha_fin = fecha_fin

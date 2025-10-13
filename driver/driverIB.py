@@ -5,9 +5,18 @@ import time
 import math
 
 class DriverIB:
-    def __init__(self, puerto):
-        self.puerto = puerto
-        self.ib = None
+    def __init__(self):
+        self.ib = IB()
+        self.puerto=None
+
+    def conectar(self,puerto):
+        self.ib.connect('127.0.0.1', puerto, clientId=1)
+        self.puerto=puerto
+
+    def disconnect(self):
+        if self.ib is not None:
+            self.ib.disconnect()
+            self.ib = None
 
     def conectar(self, desatendido=False):
         self.ib=IB()

@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+set -o pipefail
+
+proj="${PWD:t}"
+venv_dir="$HOME/venvs/$proj"
+py="$venv_dir/bin/python"
+
+python3.11 -m venv "$venv_dir"
+source "$venv_dir/bin/activate"
+
+mkdir -p .vscode
+cat > .vscode/settings.json <<EOF
+{
+  "python.venvPath": "$HOME/venvs",
+  "python.defaultInterpreterPath": "$venv_dir/bin/python"
+}
+EOF
+
+echo "Python usado: $($py -V)"
+echo "pip usado: $($py -m pip -V)"
+echo "Entorno creado en: $venv_dir"
+
+# pip seguro
+$py -m pip install --upgrade pip
+
+if [[ -f requirements.txt ]]; then
+  # Desactivar -e si lo tienes activo
+  set +e
+  $py -m pip install -r requirements.txt 
+  status=$?
+  set -e 2>/dev/null || true   # reactivar si quieres
+  if (( status != 0 )); then
+    echo "❌ pip falló (exit $status)." 
+  fi
+else
+  echo "No hay requirements.txt, continúo..."
+fi
+
+read "?Pulsa Enter para cerrar…"
