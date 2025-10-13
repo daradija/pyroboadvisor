@@ -1,2 +1,1 @@
 ib_insync
-degiro-connector
