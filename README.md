@@ -13,10 +13,29 @@ Si quieres operar PyRoboAdvisor, de forma automatizada puedes usar nuestro códi
 
 Dependiendo del sistema operativo que tengas, la instalación cambia levemente.
 
-- 🪟 **Para Windows 10:** [Sigue este tutorial](tutorial_windows10.md)
-- 🍎 **Para macOS:** [Sigue este tutorial](tutorial_macos.md)
-- ☁️ **Para Google Colab (simulación en la nube):** [Sigue este tutorial](tutorial_colab.md)
+- 🪟 **Windows 10/11:** [Sigue este tutorial](tutorial_windows10.md)
+- 🍎 **macOS:** [Sigue este tutorial](tutorial_macos.md)
+- ☁️ **Google Colab (DEMO, sin instalación):** [Sigue este tutorial](tutorial_colab.md)
 
+> **Colab es solo para DEMOSTRACIÓN**: ejecuta en la nube sin instalar nada en tu equipo.
+
+>Si necesitas ayuda, puedes usar este GPT como asistente [Asistente Instalación - PyRoboAdvisor](https://chatgpt.com/g/g-68f0cf5e1920819182e6bcbf42312b4d-pyroboadvisor-asistente-de-instalacion)
+
+# Operativa manual
+
+La operativa manual se usa cuando no hay un driver disponible para el broker.
+Debe editarse el archivo `sample_b.py` para incluir:
+
+- dinero disponible,
+
+- fecha actual,
+
+- posiciones de cartera (acciones y cantidades).
+
+Esto garantiza que la cartera esté actualizada antes de operar.
+Si se comete un error, no se puede reutilizar la misma licencia.
+Puede usarse ChatGPT para generar el código a partir de una captura del broker.
+Luego, la operativa funciona igual que el modo 2 de Interactive Brokers (lectura manual).
 
 # Ejecución
 
@@ -61,26 +80,39 @@ Es importante, sobre todo si se cambian los parámetros realizar simulaciones pa
 
 # Simulaciones
 
-La tabla de parámetros se encuentra en el archivo `sample.py` y puedes ajustarla según tus necesidades.
+La tabla de parámetros se encuentra en el archivo `sample_b.py` y puedes ajustarla según tus necesidades.
 
 ```python
 p={
     "fecha_inicio": "2019-01-01",
-    "fecha_fin": "2025-12-31",
+    "fecha_fin": stoday,
     "money": 100000,
     "numberStocksInPortfolio": 10,
     "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
     "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
-    "apalancamiento": 10 / 6,  # apalancamiento de las compras
-    "ring_size": 240,
-    "rlog_size": 24,
     "cabeza": 5,
-    "seeds": 100,
-    "percentil": 95,
-    "prediccion": 1,
+    
+    "percentil": 90,
+    "seeds": 1000,
 
+
+    "har":1,
+    "hretorno":1,
+    "hrandom":1,
+
+    "ring_size": 252,
+    "multiploMantenimiento": 6,
+    "rlog_size": 22,
+    # "skip_days": 252,
+    "prediccion": 1,
+    "apalancamiento": 1,  
+
+
+    # "random_seed": 12, # [0,1,2,3],
     "key": "",
     "email": "",
+
+    "b":True,
 }
 ```
 
@@ -140,7 +172,7 @@ Durante la simulación se muestra:
 
 El DDPP (Draw Down por Percentiles) es una medida del riesgo de la cartera, que me he inventado. Un número mayor es mejor. Por ejemplo un 100% indica que el valor de tasación está por encima del 100% de los últimos 240 días (1 año).
 
-![](assets/17506106676794.jpg)
+![](assets/B2_1.png)
 Gráfica mostrada al final, comparando la estrategia con el índice de referencia.
 
 # Parámetros
@@ -184,17 +216,17 @@ Lo primero que hace el sistema es decargarse los datos de Yahoo Finance.
 
 En algunos entornos como codespaces la visualización de gráficas está restringida. O no te interesa verla.
 
-La siguiente pregunta es sobre el apalancamiento. Recuerda que los primeros días el apalancamiento en la operatoria real recomiendo que sea inferior. En la simulación podemos ir con todo el potencial del apalancamiento. 1 si es cuenta sin margen, o 1.7 si es con margen:
+La siguiente pregunta es sobre el apalancamiento. Recuerda que los primeros días el apalancamiento en la operatoria real recomiendo que sea inferior. En la simulación podemos ir con todo el potencial del apalancamiento. 1 si es cuenta sin margen, o 1.6 por ejemplo si es con margen. El apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
 
 ```bash
-Apalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.
+Apalancamiento: (un número entre 0.0 y 1.9) que representa el uso del cash.
 Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.
 Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.
  0   No compres hoy
  0.2 Usa el 20% del cash
  1   Usar todo el dinero disponible
- 1.7 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
-Ingrese el apalancamiento: 1.7
+ 1.6 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
+Ingrese el apalancamiento: 1.6
 ``
 
 Se descargan las acciones históricas:
@@ -327,14 +359,14 @@ El siguiente parametro que te pregunta es el apalancamiento. En este sistema un 
 El broker te permite utilizar un apalancamiento de hasta 2, pero debes configurar la cuenta de tipo margen para poder utilizarlo. En el broker Interactive Brokers, te concede un prestamo y toma como garantía las acciones que tienes en tu cartera. Obviamente esto conlleva un riesgo, pero nada que ver con el apalancamiento de las criptomonedas o los sistemas forex, que pueden llegar a ser de 20.
 
 ```bash
-Apalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.
+Apalancamiento: (un número entre 0.0 y 1.9) que representa el uso del cash.
 Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.
 Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.
  0   No compres hoy
  0.2 Usa el 20% del cash
  1   Usar todo el dinero disponible
- 1.7 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
-Ingrese el apalancamiento: 1.7
+ 1.6 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
+Ingrese el apalancamiento: 1.6
 ```
 Importante: Si eres primerizo, empieza con un apalancamiento de 0.2 y ve subiendo poco a poco en sucesivos días a medida que el sistema compre. Es comun que no compre. No opera todo los días, ya que el sistema no encuentra oportunidades de compra. Esto es importante para diversificar la cartera y los días de entrada. Si no lo haces así, puede emplear todo el capital en una única acción, lo que aumenta la volatilidad de la cartera.
 
@@ -368,33 +400,3 @@ Si todo va bien el resultado fina es de la forma:
 ![](assets/17520482491940.jpg)
 
 Si es operatoria manual, pues toca insertar en el broker la operatoria propuesta o someterla al filtro que estimes oportuno.
-
-# Operativa manual
-
-Esto es cuando se opta por la opción 1. 100% manual, incluso la lectura.
-
-Operar en manual es interesante para operar con brokers en los que la comunidad no tenga un driver.
-
-```bash
-Debes incluir el dinero disponible, fecha de hoy, y las posiciones de cartera en la llamada (sample.py)
-
-pra=PyRoboAdvisor(p,1000,"2025-07-09",{
-        "AAPL": 20,
-        "MSFT": 20,
-        "GOOGL": 20,
-})
-```
-
-Este es el mensaje que se genera la primera vez que operamos en manual o cuando no está ajustada la fecha.
-
-Esto nos indica que debemos abrir el archivo `sample_B.py` e insertar con el formato expuesto, el dinero disponible, la fecha de hoy y las posiciones de cartera.
-
-¿Por que se exige la fecha de hoy? Para aseguarnos de que se ha revisado la cartera y se han actualizado las acciones que tenemos en cartera.
-
-Recuerda que si te equivocas, no podrás operar dos veces con la misma licencia.
-
-Idea: Puedes intentar usar chatGPT para que te complete el código, le pasas una foto del broker. Mis pruebas han sido satisfactorias, incluso con la versión gratuita de chatGPT. Pero obviamente no he probado todos los brokers.
-
-Una vez introducida la posición y vuelto a ejecutar.
-
-A continuación la operatoria es similar a la de Interactive Brokers en modo 2, cuando lee de IB y es manual.
