@@ -3,86 +3,33 @@
 Para conocer el proyecto y la filosofía detrás de PyRoboAdvisor, visita el siguiente enlace: [PyRoboAdvisor](https://pyroboadvisor.com)
 
 # Pre-requisitos
-Para ejecutar PyRoboAdvisor, debes comprar una licencia de la estrategia A1.
+Para ejecutar PyRoboAdvisor, debes comprar una licencia de la estrategia.
 Tras la compra llega una clave por correo electrónico.
 
-Actualmente solo está operativo el modo de simulación. 
-En nuestro roadmap está previsto implementar un driver de acceso a Interactive Brokers, que es el broker que utilizamos para operar.
-
-https://www.interactivebrokers.ie/es/home.php
-
-Por lo tanto si quieres operar PyRoboAdvisor, de forma automatizada debes tener una cuenta de Interactive Brokers. Es bajo tu entera responsabilidad la ejecución y automatización de las órdenes de compra y venta. 
+Si quieres operar PyRoboAdvisor, de forma automatizada puedes usar nuestro código abierto que lo hace a través de la API de Interactive Brokers. Es bajo tu entera responsabilidad la ejecución y automatización de las órdenes de compra y venta. 
 
 # Instalación
 
-Instala python 3.10 o superior.
 
-En Windows, puedes instalar Python desde la Microsoft Store o desde la página oficial de Python: [Python Downloads](https://www.python.org/downloads/).
+Dependiendo del sistema operativo que tengas, la instalación cambia levemente.
 
-En Linux, puedes instalar Python utilizando el gestor de paquetes de tu distribución. Por ejemplo, en Ubuntu puedes usar:
-
-```bash
-sudo apt update
-sudo apt install python3 python3-pip
-```
-
-En MacOS, puedes instalar Python utilizando Homebrew:
-
-```bash
-brew install python
-```
-
-Dependiendo del sistema operativo necesitas iniciar un terminal o consola de comandos.
-En Linux o MacOS, abre una terminal. En Windows, abre la consola de comandos (cmd) o PowerShell.
-
-Asegúrate de que tienes `git` instalado. Puedes verificarlo ejecutando:
-
-```bash
-git --version
-```
-Si no lo tienes instalado, puedes descargarlo desde [Git Downloads](https://git-scm.com/downloads) o instalarlo utilizando el gestor de paquetes de tu sistema.
-
-Descarga el código fuente de PyRoboAdvisor desde el repositorio oficial de GitHub:
-
-```bash
-git clone https://github.com/daradija/pyroboadvisor.git
-cd pyroboadvisor
-```
-Recomiendo instalar un entorno virtual para evitar conflictos con otras dependencias de Python. Puedes crear un entorno virtual con el siguiente comando:
-
-```bash
-python3 -m venv venv
-```
-Luego, activa el entorno virtual:
-
-```bash
-source venv/bin/activate
-``` 
-
-Instala las dependencias necesarias ejecutando el siguiente comando:
-
-```bash
-pip install -r requirements.txt
-``` 
-
-Si no funciona prueba:
-```bash
-python3 -m pip install -r requirements.txt
-```
+- 🪟 **Para Windows 10:** [Sigue este tutorial](tutorial_windows10.md)
+- 🍎 **Para macOS:** [Sigue este tutorial](tutorial_macos.md)
+- ☁️ **Para Google Colab (simulación en la nube):** [Sigue este tutorial](tutorial_colab.md)
 
 
 # Ejecución
 
 Tanto para ejecutar como para simular PyRoboAdvisor, utiliza el siguiente comando:
 ```bash
-python3 sample.py
+python3 sample_b.py
 ````
 o en las versiones modernas:
 ```bash
-py sample.py
+py sample_b.py
 ```
 
-Antes teníamos que editar el archivo `sample.py` y añadir nuestro email y clave de licencia, pero en la nueva versión al arrancar te pregunta por estos datos.
+Al arrancar te preguntará por tu « **Email** » y por tu « **Key** (clave - Licencia, te llegó al correo al comprarla ) ». Para obtener una key visite https://pyroboadvisor.com
 
 Secuencia
 ```bash
@@ -96,8 +43,8 @@ A continuación pregunta por el modo de operación:
 
 ```bash
 Modo: 
- 0. Solo simulación
- 5. Purgar caché
+ 1. Solo simulación
+ 2. Purgar caché
 
  Operar con broker:
   1. Manual
@@ -142,7 +89,7 @@ Puedes ver el código fuente para verificar cuanto aquí se comenta.
 
 Una de los mayores errores al diseñar una estrategia de trading es usar información futura. Es decir, usar información que no estaba disponible en el momento de la operación.
 
-Puedes observar que nuestra caja negra se alimenta primero de las velas Open, el sistema responde con las operacioens de compra y venta del día y a continuación se simula con el resto de la información de la vela: el High, Low y Close. Close solo tiene fines tasativos.
+Puedes observar que nuestra caja negra se alimenta primero de las velas Open, el sistema responde con las operaciones de compra y venta del día y a continuación se simula con el resto de la información de la vela: el High, Low y Close. Close solo tiene fines tasativos.
 
 La idea es muy sencilla, si la orden limite está entre el high y el low de la vela, se ejecuta la orden. Si no, no se ejecuta.
 
@@ -198,7 +145,7 @@ Gráfica mostrada al final, comparando la estrategia con el índice de referenci
 
 # Parámetros
 
-Si deseas afinar el algoritmo, puedes modificar los parámetros en el diccionario `p` del archivo `sample.py`.
+Si deseas afinar el algoritmo, puedes modificar los parámetros en el diccionario `p` del archivo `sample_b.py`.
 
 - Los parámetros `fecha_inicio` y `fecha_fin` definen el periodo de simulación.
 
@@ -225,7 +172,7 @@ El resto de parámetros son internos del algoritmo y no es necesario modificarlo
 
 - Los estimadores usan un número de acciones como referencia ('cabeza') para establecer el estimador.  
 
-- El parámetro mas poderoso es el `percentil`, en teoría se tendría que usar el percentil 50, pero he observado que el percentil 95 da mejores resultados. Es decir, hay que ser obtimista con respecto a las predicciones. 
+- El parámetro mas poderoso es el `percentil`, en teoría se tendría que usar el percentil 50, pero he observado que el percentil 95 da mejores resultados. Es decir, hay que ser optimista con respecto a las predicciones. 
 
 - El sistema por defecto realiza una predicción de 1 día, es decir, el sistema predice el precio de la acción al día siguiente. Si deseas cambiar esto, puedes modificar el parámetro `prediccion`. Por ejemplo, si quieres predecir el precio a 5 días vista, establece `prediccion` a 5, 10, el número ha de ser menor que la ventana `rlog_size`. Ya que la predicción consume parte de esta ventana. No pongas mas de un 50% del valor de `rlog_size`.
 
@@ -277,25 +224,25 @@ Comienza la simulación.
 
 ```console
 2024-12-17 Value: $436449 $40946 APA/2342 DXCM/410 ENPH/87 INCY/599 PAYC/385 PCG/1280 PODD/347 SMCI/1827 
-TAE: 34.98% DDPP: 93.75%/81.62% Sharpe Log (A/SP500): 1.72
+TAE: 34.98% DDPP: 93.75%/81.62% Sharpe Log (B/SP500): 1.72
 Comisión: $0.00
 2024-12-18 Value: $418494 $40946 APA/2342 DXCM/410 ENPH/87 INCY/599 PAYC/385 PCG/1280 PODD/347 SMCI/1827 
-TAE: 33.81% DDPP: 92.08%/81.63% Sharpe Log (A/SP500): 1.67
+TAE: 33.81% DDPP: 92.08%/81.63% Sharpe Log (B/SP500): 1.67
 Comisión: $0.00
 2024-12-19 Value: $414902 $40946 APA/2342 DXCM/410 ENPH/87 INCY/599 PAYC/385 PCG/1280 PODD/347 SMCI/1827 
-TAE: 33.55% DDPP: 91.25%/81.64% Sharpe Log (A/SP500): 1.66
+TAE: 33.55% DDPP: 91.25%/81.64% Sharpe Log (B/SP500): 1.66
 Comisión: $284.83
 2024-12-20 Value: $420606 $209399 APA/2342 DXCM/410 ENPH/87 INCY/599 PCG/1280 SMCI/1827 
-TAE: 33.90% DDPP: 92.50%/81.65% Sharpe Log (A/SP500): 1.68
+TAE: 33.90% DDPP: 92.50%/81.65% Sharpe Log (B/SP500): 1.68
 Comisión: $3.78
 2024-12-23 Value: $425438 $122165 APA/2342 DXCM/410 ENPH/87 INCY/599 MRNA/2237 PCG/1280 SMCI/1827 
-TAE: 34.15% DDPP: 92.50%/81.66% Sharpe Log (A/SP500): 1.69
+TAE: 34.15% DDPP: 92.50%/81.66% Sharpe Log (B/SP500): 1.69
 Comisión: $0.90
 2024-12-24 Value: $431435 $54414 AMD/534 APA/2342 DXCM/410 ENPH/87 INCY/599 MRNA/2237 PCG/1280 SMCI/1827 
-TAE: 34.51% DDPP: 92.92%/81.67% Sharpe Log (A/SP500): 1.70
+TAE: 34.51% DDPP: 92.92%/81.67% Sharpe Log (B/SP500): 1.70
 Comisión: $0.00
 2024-12-26 Value: $429879 $54414 AMD/534 APA/2342 DXCM/410 ENPH/87 INCY/599 MRNA/2237 PCG/1280 SMCI/1827 
-TAE: 34.36% DDPP: 92.50%/81.68% Sharpe Log (A/SP500): 1.70
+TAE: 34.36% DDPP: 92.50%/81.68% Sharpe Log (B/SP500): 1.70
 Comisión: $0.00
 ````
 
@@ -322,7 +269,7 @@ Hay dos valores, el valor actual y el valor medio.
 
 La mayoría de los días no hay operaciones, es normal. He desarrollado una versión de baja rotacion de cartera para pagar menos comisiones.
 
-El Sharpe Log (A/SP500) es cuantas veces lo hace mejor la estrategia con respecto al SP500. En el caso de 1.70 significa que lo hace un 70% en términos de rentabilidad/varianza. O sea, que aunque tenga mucha varianza, la rentabilidad lo compensa. Durante un tiempo definí que era una estrategia de alto riesgo y ahora con estos datos me tengo que comer mis palabras.
+El Sharpe Log (B/SP500) es cuantas veces lo hace mejor la estrategia con respecto al SP500. En el caso de 1.70 significa que lo hace un 70% en términos de rentabilidad/varianza. O sea, que aunque tenga mucha varianza, la rentabilidad lo compensa. Durante un tiempo definí que era una estrategia de alto riesgo y ahora con estos datos me tengo que comer mis palabras.
 
 Para mas información véase:
 logSP500.md
@@ -332,7 +279,7 @@ Termina cuando llega al presente.
 
 En dicho caso si se ha configurado se muestra una gráfica con el resultado.
 
-![](assets/17520454933427.jpg)
+![](assets/B2_1.png)
 
 Cada licencia tiene su propio azar. Controlado por una semilla aleatoria. Esto significa que cada licencia se fija en diferentes dimensiones. Y por lo tanto puede variar el resultado final.
 
@@ -406,7 +353,7 @@ Es importante esperar un tiempo después de la apertura del mercado. Sobre todo 
 
 Hay dos momentos, cuando se descarga el histórico y cuando se dan las órdens.
 
-Importante: La descarga de los datos históricos no se pude hacer muy temprano. He puesto avisos. Por ejemplo a las 6 AM (hora de España) el mercado Americano cambia de dia. Unas horas después  los datos de las velas son cargados. Si cargas muy temprano los datos históricos te quedarás SIN el día de ayer. Y ESO ES UN GRAN ERROR. No está filtrado porque a veces hay fines de semana y días festivos.
+Importante: La descarga de los datos históricos no se pude hacer muy temprano. He puesto avisos. Por ejemplo a las 6 AM (hora de España) el mercado Americano cambia de dia. Unas horas después  los datos de las velas son cargados. Si cargas muy temprano los datos históricos te quedarás SIN el día de ayer. **Y ESO ES UN GRAN ERROR**. No está filtrado porque a veces hay fines de semana y días festivos.
 
 En caso de que veas este error es que has ejecutado la operatoria ya hoy. 
 Puedes comprar una segunda licencia.
@@ -424,7 +371,7 @@ Si es operatoria manual, pues toca insertar en el broker la operatoria propuesta
 
 # Operativa manual
 
-Esto es cuando se opta por la opción 1. 100% manual, uncluso la lectura.
+Esto es cuando se opta por la opción 1. 100% manual, incluso la lectura.
 
 Operar en manual es interesante para operar con brokers en los que la comunidad no tenga un driver.
 
@@ -440,7 +387,7 @@ pra=PyRoboAdvisor(p,1000,"2025-07-09",{
 
 Este es el mensaje que se genera la primera vez que operamos en manual o cuando no está ajustada la fecha.
 
-Esto nos indica que debemos abrir el archivo `sample.py` e insertar con el formato expuesto, el dinero disponible, la fecha de hoy y las posiciones de cartera.
+Esto nos indica que debemos abrir el archivo `sample_B.py` e insertar con el formato expuesto, el dinero disponible, la fecha de hoy y las posiciones de cartera.
 
 ¿Por que se exige la fecha de hoy? Para aseguarnos de que se ha revisado la cartera y se han actualizado las acciones que tenemos en cartera.
 
