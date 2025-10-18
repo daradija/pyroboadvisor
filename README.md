@@ -3,86 +3,52 @@
 Para conocer el proyecto y la filosofía detrás de PyRoboAdvisor, visita el siguiente enlace: [PyRoboAdvisor](https://pyroboadvisor.com)
 
 # Pre-requisitos
-Para ejecutar PyRoboAdvisor, debes comprar una licencia de la estrategia A1.
+Para ejecutar PyRoboAdvisor, debes comprar una licencia de la estrategia.
 Tras la compra llega una clave por correo electrónico.
 
-Actualmente solo está operativo el modo de simulación. 
-En nuestro roadmap está previsto implementar un driver de acceso a Interactive Brokers, que es el broker que utilizamos para operar.
-
-https://www.interactivebrokers.ie/es/home.php
-
-Por lo tanto si quieres operar PyRoboAdvisor, de forma automatizada debes tener una cuenta de Interactive Brokers. Es bajo tu entera responsabilidad la ejecución y automatización de las órdenes de compra y venta. 
+Si quieres operar PyRoboAdvisor, de forma automatizada puedes usar nuestro código abierto que lo hace a través de la API de Interactive Brokers. Es bajo tu entera responsabilidad la ejecución y automatización de las órdenes de compra y venta. 
 
 # Instalación
 
-Instala python 3.10 o superior.
 
-En Windows, puedes instalar Python desde la Microsoft Store o desde la página oficial de Python: [Python Downloads](https://www.python.org/downloads/).
+Dependiendo del sistema operativo que tengas, la instalación cambia levemente.
 
-En Linux, puedes instalar Python utilizando el gestor de paquetes de tu distribución. Por ejemplo, en Ubuntu puedes usar:
+- 🪟 **Windows 10/11:** [Sigue este tutorial](tutorial_windows10.md)
+- 🍎 **macOS:** [Sigue este tutorial](tutorial_macos.md)
+- ☁️ **Google Colab (DEMO, sin instalación):** [Sigue este tutorial](tutorial_colab.md)
 
-```bash
-sudo apt update
-sudo apt install python3 python3-pip
-```
+> **Colab es solo para DEMOSTRACIÓN**: ejecuta en la nube sin instalar nada en tu equipo.
 
-En MacOS, puedes instalar Python utilizando Homebrew:
+>Si necesitas ayuda, puedes usar este GPT como asistente [Asistente Instalación - PyRoboAdvisor](https://chatgpt.com/g/g-68f0cf5e1920819182e6bcbf42312b4d-pyroboadvisor-asistente-de-instalacion)
 
-```bash
-brew install python
-```
+# Operativa manual
 
-Dependiendo del sistema operativo necesitas iniciar un terminal o consola de comandos.
-En Linux o MacOS, abre una terminal. En Windows, abre la consola de comandos (cmd) o PowerShell.
+La operativa manual se usa cuando no hay un driver disponible para el broker.
+Debe editarse el archivo `sample_b.py` para incluir:
 
-Asegúrate de que tienes `git` instalado. Puedes verificarlo ejecutando:
+- dinero disponible,
 
-```bash
-git --version
-```
-Si no lo tienes instalado, puedes descargarlo desde [Git Downloads](https://git-scm.com/downloads) o instalarlo utilizando el gestor de paquetes de tu sistema.
+- fecha actual,
 
-Descarga el código fuente de PyRoboAdvisor desde el repositorio oficial de GitHub:
+- posiciones de cartera (acciones y cantidades).
 
-```bash
-git clone https://github.com/daradija/pyroboadvisor.git
-cd pyroboadvisor
-```
-Recomiendo instalar un entorno virtual para evitar conflictos con otras dependencias de Python. Puedes crear un entorno virtual con el siguiente comando:
-
-```bash
-python3 -m venv venv
-```
-Luego, activa el entorno virtual:
-
-```bash
-source venv/bin/activate
-``` 
-
-Instala las dependencias necesarias ejecutando el siguiente comando:
-
-```bash
-pip install -r requirements.txt
-``` 
-
-Si no funciona prueba:
-```bash
-python3 -m pip install -r requirements.txt
-```
-
+Esto garantiza que la cartera esté actualizada antes de operar.
+Si se comete un error, no se puede reutilizar la misma licencia.
+Puede usarse ChatGPT para generar el código a partir de una captura del broker.
+Luego, la operativa funciona igual que el modo 2 de Interactive Brokers (lectura manual).
 
 # Ejecución
 
 Tanto para ejecutar como para simular PyRoboAdvisor, utiliza el siguiente comando:
 ```bash
-python3 sample.py
+python3 sample_b.py
 ````
 o en las versiones modernas:
 ```bash
-py sample.py
+py sample_b.py
 ```
 
-Antes teníamos que editar el archivo `sample.py` y añadir nuestro email y clave de licencia, pero en la nueva versión al arrancar te pregunta por estos datos.
+Al arrancar te preguntará por tu « **Email** » y por tu « **Key** (clave - Licencia, te llegó al correo al comprarla ) ». Para obtener una key visite https://pyroboadvisor.com
 
 Secuencia
 ```bash
@@ -96,8 +62,8 @@ A continuación pregunta por el modo de operación:
 
 ```bash
 Modo: 
- 0. Solo simulación
- 5. Purgar caché
+ 1. Solo simulación
+ 2. Purgar caché
 
  Operar con broker:
   1. Manual
@@ -114,26 +80,39 @@ Es importante, sobre todo si se cambian los parámetros realizar simulaciones pa
 
 # Simulaciones
 
-La tabla de parámetros se encuentra en el archivo `sample.py` y puedes ajustarla según tus necesidades.
+La tabla de parámetros se encuentra en el archivo `sample_b.py` y puedes ajustarla según tus necesidades.
 
 ```python
 p={
     "fecha_inicio": "2019-01-01",
-    "fecha_fin": "2025-12-31",
+    "fecha_fin": stoday,
     "money": 100000,
     "numberStocksInPortfolio": 10,
     "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
     "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
-    "apalancamiento": 10 / 6,  # apalancamiento de las compras
-    "ring_size": 240,
-    "rlog_size": 24,
     "cabeza": 5,
-    "seeds": 100,
-    "percentil": 95,
-    "prediccion": 1,
+    
+    "percentil": 90,
+    "seeds": 1000,
 
+
+    "har":1,
+    "hretorno":1,
+    "hrandom":1,
+
+    "ring_size": 252,
+    "multiploMantenimiento": 6,
+    "rlog_size": 22,
+    # "skip_days": 252,
+    "prediccion": 1,
+    "apalancamiento": 1,  
+
+
+    # "random_seed": 12, # [0,1,2,3],
     "key": "",
     "email": "",
+
+    "b":True,
 }
 ```
 
@@ -142,7 +121,7 @@ Puedes ver el código fuente para verificar cuanto aquí se comenta.
 
 Una de los mayores errores al diseñar una estrategia de trading es usar información futura. Es decir, usar información que no estaba disponible en el momento de la operación.
 
-Puedes observar que nuestra caja negra se alimenta primero de las velas Open, el sistema responde con las operacioens de compra y venta del día y a continuación se simula con el resto de la información de la vela: el High, Low y Close. Close solo tiene fines tasativos.
+Puedes observar que nuestra caja negra se alimenta primero de las velas Open, el sistema responde con las operaciones de compra y venta del día y a continuación se simula con el resto de la información de la vela: el High, Low y Close. Close solo tiene fines tasativos.
 
 La idea es muy sencilla, si la orden limite está entre el high y el low de la vela, se ejecuta la orden. Si no, no se ejecuta.
 
@@ -193,12 +172,12 @@ Durante la simulación se muestra:
 
 El DDPP (Draw Down por Percentiles) es una medida del riesgo de la cartera, que me he inventado. Un número mayor es mejor. Por ejemplo un 100% indica que el valor de tasación está por encima del 100% de los últimos 240 días (1 año).
 
-![](assets/17506106676794.jpg)
+![](assets/B2_1.png)
 Gráfica mostrada al final, comparando la estrategia con el índice de referencia.
 
 # Parámetros
 
-Si deseas afinar el algoritmo, puedes modificar los parámetros en el diccionario `p` del archivo `sample.py`.
+Si deseas afinar el algoritmo, puedes modificar los parámetros en el diccionario `p` del archivo `sample_b.py`.
 
 - Los parámetros `fecha_inicio` y `fecha_fin` definen el periodo de simulación.
 
@@ -225,7 +204,7 @@ El resto de parámetros son internos del algoritmo y no es necesario modificarlo
 
 - Los estimadores usan un número de acciones como referencia ('cabeza') para establecer el estimador.  
 
-- El parámetro mas poderoso es el `percentil`, en teoría se tendría que usar el percentil 50, pero he observado que el percentil 95 da mejores resultados. Es decir, hay que ser obtimista con respecto a las predicciones. 
+- El parámetro mas poderoso es el `percentil`, en teoría se tendría que usar el percentil 50, pero he observado que el percentil 95 da mejores resultados. Es decir, hay que ser optimista con respecto a las predicciones. 
 
 - El sistema por defecto realiza una predicción de 1 día, es decir, el sistema predice el precio de la acción al día siguiente. Si deseas cambiar esto, puedes modificar el parámetro `prediccion`. Por ejemplo, si quieres predecir el precio a 5 días vista, establece `prediccion` a 5, 10, el número ha de ser menor que la ventana `rlog_size`. Ya que la predicción consume parte de esta ventana. No pongas mas de un 50% del valor de `rlog_size`.
 
@@ -237,17 +216,17 @@ Lo primero que hace el sistema es decargarse los datos de Yahoo Finance.
 
 En algunos entornos como codespaces la visualización de gráficas está restringida. O no te interesa verla.
 
-La siguiente pregunta es sobre el apalancamiento. Recuerda que los primeros días el apalancamiento en la operatoria real recomiendo que sea inferior. En la simulación podemos ir con todo el potencial del apalancamiento. 1 si es cuenta sin margen, o 1.7 si es con margen:
+La siguiente pregunta es sobre el apalancamiento. Recuerda que los primeros días el apalancamiento en la operatoria real recomiendo que sea inferior. En la simulación podemos ir con todo el potencial del apalancamiento. 1 si es cuenta sin margen, o 1.6 por ejemplo si es con margen. El apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
 
 ```bash
-Apalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.
+Apalancamiento: (un número entre 0.0 y 1.9) que representa el uso del cash.
 Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.
 Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.
  0   No compres hoy
  0.2 Usa el 20% del cash
  1   Usar todo el dinero disponible
- 1.7 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
-Ingrese el apalancamiento: 1.7
+ 1.6 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
+Ingrese el apalancamiento: 1.6
 ``
 
 Se descargan las acciones históricas:
@@ -277,25 +256,25 @@ Comienza la simulación.
 
 ```console
 2024-12-17 Value: $436449 $40946 APA/2342 DXCM/410 ENPH/87 INCY/599 PAYC/385 PCG/1280 PODD/347 SMCI/1827 
-TAE: 34.98% DDPP: 93.75%/81.62% Sharpe Log (A/SP500): 1.72
+TAE: 34.98% DDPP: 93.75%/81.62% Sharpe Log (B/SP500): 1.72
 Comisión: $0.00
 2024-12-18 Value: $418494 $40946 APA/2342 DXCM/410 ENPH/87 INCY/599 PAYC/385 PCG/1280 PODD/347 SMCI/1827 
-TAE: 33.81% DDPP: 92.08%/81.63% Sharpe Log (A/SP500): 1.67
+TAE: 33.81% DDPP: 92.08%/81.63% Sharpe Log (B/SP500): 1.67
 Comisión: $0.00
 2024-12-19 Value: $414902 $40946 APA/2342 DXCM/410 ENPH/87 INCY/599 PAYC/385 PCG/1280 PODD/347 SMCI/1827 
-TAE: 33.55% DDPP: 91.25%/81.64% Sharpe Log (A/SP500): 1.66
+TAE: 33.55% DDPP: 91.25%/81.64% Sharpe Log (B/SP500): 1.66
 Comisión: $284.83
 2024-12-20 Value: $420606 $209399 APA/2342 DXCM/410 ENPH/87 INCY/599 PCG/1280 SMCI/1827 
-TAE: 33.90% DDPP: 92.50%/81.65% Sharpe Log (A/SP500): 1.68
+TAE: 33.90% DDPP: 92.50%/81.65% Sharpe Log (B/SP500): 1.68
 Comisión: $3.78
 2024-12-23 Value: $425438 $122165 APA/2342 DXCM/410 ENPH/87 INCY/599 MRNA/2237 PCG/1280 SMCI/1827 
-TAE: 34.15% DDPP: 92.50%/81.66% Sharpe Log (A/SP500): 1.69
+TAE: 34.15% DDPP: 92.50%/81.66% Sharpe Log (B/SP500): 1.69
 Comisión: $0.90
 2024-12-24 Value: $431435 $54414 AMD/534 APA/2342 DXCM/410 ENPH/87 INCY/599 MRNA/2237 PCG/1280 SMCI/1827 
-TAE: 34.51% DDPP: 92.92%/81.67% Sharpe Log (A/SP500): 1.70
+TAE: 34.51% DDPP: 92.92%/81.67% Sharpe Log (B/SP500): 1.70
 Comisión: $0.00
 2024-12-26 Value: $429879 $54414 AMD/534 APA/2342 DXCM/410 ENPH/87 INCY/599 MRNA/2237 PCG/1280 SMCI/1827 
-TAE: 34.36% DDPP: 92.50%/81.68% Sharpe Log (A/SP500): 1.70
+TAE: 34.36% DDPP: 92.50%/81.68% Sharpe Log (B/SP500): 1.70
 Comisión: $0.00
 ````
 
@@ -322,7 +301,7 @@ Hay dos valores, el valor actual y el valor medio.
 
 La mayoría de los días no hay operaciones, es normal. He desarrollado una versión de baja rotacion de cartera para pagar menos comisiones.
 
-El Sharpe Log (A/SP500) es cuantas veces lo hace mejor la estrategia con respecto al SP500. En el caso de 1.70 significa que lo hace un 70% en términos de rentabilidad/varianza. O sea, que aunque tenga mucha varianza, la rentabilidad lo compensa. Durante un tiempo definí que era una estrategia de alto riesgo y ahora con estos datos me tengo que comer mis palabras.
+El Sharpe Log (B/SP500) es cuantas veces lo hace mejor la estrategia con respecto al SP500. En el caso de 1.70 significa que lo hace un 70% en términos de rentabilidad/varianza. O sea, que aunque tenga mucha varianza, la rentabilidad lo compensa. Durante un tiempo definí que era una estrategia de alto riesgo y ahora con estos datos me tengo que comer mis palabras.
 
 Para mas información véase:
 logSP500.md
@@ -332,7 +311,7 @@ Termina cuando llega al presente.
 
 En dicho caso si se ha configurado se muestra una gráfica con el resultado.
 
-![](assets/17520454933427.jpg)
+![](assets/B2_1.png)
 
 Cada licencia tiene su propio azar. Controlado por una semilla aleatoria. Esto significa que cada licencia se fija en diferentes dimensiones. Y por lo tanto puede variar el resultado final.
 
@@ -380,14 +359,14 @@ El siguiente parametro que te pregunta es el apalancamiento. En este sistema un 
 El broker te permite utilizar un apalancamiento de hasta 2, pero debes configurar la cuenta de tipo margen para poder utilizarlo. En el broker Interactive Brokers, te concede un prestamo y toma como garantía las acciones que tienes en tu cartera. Obviamente esto conlleva un riesgo, pero nada que ver con el apalancamiento de las criptomonedas o los sistemas forex, que pueden llegar a ser de 20.
 
 ```bash
-Apalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.
+Apalancamiento: (un número entre 0.0 y 1.9) que representa el uso del cash.
 Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.
 Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.
  0   No compres hoy
  0.2 Usa el 20% del cash
  1   Usar todo el dinero disponible
- 1.7 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
-Ingrese el apalancamiento: 1.7
+ 1.6 Un ligero apalancamiento dispara la rentabilidad, usalo cuando hayas simulado y tengas confianza en la estrategia
+Ingrese el apalancamiento: 1.6
 ```
 Importante: Si eres primerizo, empieza con un apalancamiento de 0.2 y ve subiendo poco a poco en sucesivos días a medida que el sistema compre. Es comun que no compre. No opera todo los días, ya que el sistema no encuentra oportunidades de compra. Esto es importante para diversificar la cartera y los días de entrada. Si no lo haces así, puede emplear todo el capital en una única acción, lo que aumenta la volatilidad de la cartera.
 
@@ -406,7 +385,7 @@ Es importante esperar un tiempo después de la apertura del mercado. Sobre todo 
 
 Hay dos momentos, cuando se descarga el histórico y cuando se dan las órdens.
 
-Importante: La descarga de los datos históricos no se pude hacer muy temprano. He puesto avisos. Por ejemplo a las 6 AM (hora de España) el mercado Americano cambia de dia. Unas horas después  los datos de las velas son cargados. Si cargas muy temprano los datos históricos te quedarás SIN el día de ayer. Y ESO ES UN GRAN ERROR. No está filtrado porque a veces hay fines de semana y días festivos.
+Importante: La descarga de los datos históricos no se pude hacer muy temprano. He puesto avisos. Por ejemplo a las 6 AM (hora de España) el mercado Americano cambia de dia. Unas horas después  los datos de las velas son cargados. Si cargas muy temprano los datos históricos te quedarás SIN el día de ayer. **Y ESO ES UN GRAN ERROR**. No está filtrado porque a veces hay fines de semana y días festivos.
 
 En caso de que veas este error es que has ejecutado la operatoria ya hoy. 
 Puedes comprar una segunda licencia.
@@ -421,33 +400,3 @@ Si todo va bien el resultado fina es de la forma:
 ![](assets/17520482491940.jpg)
 
 Si es operatoria manual, pues toca insertar en el broker la operatoria propuesta o someterla al filtro que estimes oportuno.
-
-# Operativa manual
-
-Esto es cuando se opta por la opción 1. 100% manual, uncluso la lectura.
-
-Operar en manual es interesante para operar con brokers en los que la comunidad no tenga un driver.
-
-```bash
-Debes incluir el dinero disponible, fecha de hoy, y las posiciones de cartera en la llamada (sample.py)
-
-pra=PyRoboAdvisor(p,1000,"2025-07-09",{
-        "AAPL": 20,
-        "MSFT": 20,
-        "GOOGL": 20,
-})
-```
-
-Este es el mensaje que se genera la primera vez que operamos en manual o cuando no está ajustada la fecha.
-
-Esto nos indica que debemos abrir el archivo `sample.py` e insertar con el formato expuesto, el dinero disponible, la fecha de hoy y las posiciones de cartera.
-
-¿Por que se exige la fecha de hoy? Para aseguarnos de que se ha revisado la cartera y se han actualizado las acciones que tenemos en cartera.
-
-Recuerda que si te equivocas, no podrás operar dos veces con la misma licencia.
-
-Idea: Puedes intentar usar chatGPT para que te complete el código, le pasas una foto del broker. Mis pruebas han sido satisfactorias, incluso con la versión gratuita de chatGPT. Pero obviamente no he probado todos los brokers.
-
-Una vez introducida la posición y vuelto a ejecutar.
-
-A continuación la operatoria es similar a la de Interactive Brokers en modo 2, cuando lee de IB y es manual.
