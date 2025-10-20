@@ -245,7 +245,7 @@ class PyRoboAdvisor:
         if not isinstance(self.p.get("apalancamiento"), (list)):
             print("\nApalancamiento: (un número entre 0.0 y 1.9) que representa el uso del cash.")
             print("Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.")
-            print("Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.")
+            # print("Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.")
             print(" 0   No compres hoy")
             print(" 0.2 Usa el 20% del cash")
             print(" 1   Usar todo el dinero disponible")
