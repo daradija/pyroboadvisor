@@ -142,7 +142,7 @@ class PyRoboAdvisor:
                 self.hora= program["hora"]
             self.p["polygon_key"] = config.get("polygon_key", "")
             self.p["eodhd_key"] = config.get("eodhd_key", "")
-            self.p["source"] = config["source"]
+            self.p["source"] = config.get("source",0)
             config["source"] = program.get("source", config.get("source",0))
             self.Source=sourceSource[config["source"]]
             return 
