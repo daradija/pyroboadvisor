@@ -397,7 +397,10 @@ class PyRoboAdvisor:
 
         self.s.set_portfolio(cash,portfolio2)
 
-        orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
+        if self.signoMultiplexado is None:
+            orders=self.s.open(self.source.realTime(self.sp.symbols))
+        else:
+            orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
 
         print("\nComprar:")
         for order in orders["programBuy"]:
@@ -488,8 +491,11 @@ class PyRoboAdvisor:
         self.wait()
 
         self.s.set_portfolio(cash, portfolio)
-        
-        orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
+
+        if self.signoMultiplexado is None:
+            orders=self.s.open(self.source.realTime(self.sp.symbols))
+        else:
+            orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
 
         #d.clearOrders()
         print("\nComprar:")
