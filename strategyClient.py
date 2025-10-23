@@ -12,7 +12,7 @@ timeout=60*30
 class StrategyClient:
     def __init__(self,p):
         self.verify_ssl = True  
-        api_urls=["https://127.0.0.1:443","https://pyroboadvisor.org","https://pyroboadvisor.org:441","https://pyroboadvisor.org:442","https://pyroboadvisor.org:444"]
+        api_urls=["https://127.0.0.1:443","https://pyroboadvisor.org","https://pyroboadvisor.org:441","https://pyroboadvisor.org:442","https://pyroboadvisor.org:444","https://pyroboadvisor.org:445"]
         # if self.verify_ssl is False:
         #     print("WARNING: SSL verification is disabled. This is not recommended for production use.")
         #     # un numero random entre 2 y 4
@@ -47,6 +47,7 @@ class StrategyClient:
             self.session_id = None
             try:
                 self.create_session(p)
+                print(f"Connected to {self.api_url}")
                 break
             except requests.exceptions.RequestException as e:
                 if intento>10:
