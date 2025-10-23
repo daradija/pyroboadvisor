@@ -8,7 +8,7 @@ Pones en el buscador « microsoft store »\
 Y le das a este:\
 ![](assets/17604714004320.jpg)
 
-En el buscador pones « python 3.11 »
+En el buscador pones « python 3.11 », si no te aparece pones el 12, no pasa nada.
 ![](assets/17604714042298.jpg)
 
 Y te pones este:\
@@ -115,11 +115,13 @@ De entre las opciones que te saldrán, deberás darle a la que aparece con
 ![](assets/17604718217226.jpg)
 
 
-Volvemos al terminal, vas a darle a ctrol + J para invocarlo.\
+Volvemos al terminal, vas a darle a ctrol + J para invocarlo.
+
+Vas a poner este comando:   
+`Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Bypass`
 
 Vas a poner este comando:\
 `python -m pip install --upgrade pip`
-
 
 Luego vas a poner este:\
 `pip install -r requirements.txt`
