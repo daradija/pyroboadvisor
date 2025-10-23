@@ -83,6 +83,9 @@ Escribe en el terminal:
 `cd pyroboadvisor`
 ![](assets/17604715447554.jpg)
 
+Vas a poner este comando:   
+`Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Bypass`
+
 Ahora vas a poner este comando para crear un entorno virtual para que no
 tenga conflictos con otras dependencias de python:  
 `python3 -m venv venv`
@@ -116,9 +119,6 @@ De entre las opciones que te saldrán, deberás darle a la que aparece con
 
 
 Volvemos al terminal, vas a darle a ctrol + J para invocarlo.
-
-Vas a poner este comando:   
-`Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Bypass`
 
 Vas a poner este comando:\
 `python -m pip install --upgrade pip`
