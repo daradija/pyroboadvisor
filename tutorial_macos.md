@@ -27,7 +27,7 @@ Se te abrirá visual studio code.
 
 Si no te aparece con el mismo color que yo tengo no te preocupes.
 
-Le vas a dar aquí debajo, en la tuerca:\
+Le vas a dar aquí debajo, en la tuerca:   
 Tuerca - Themes - Color Theme
 
 Y te pones **Quiet Light** o el que prefieras.\
