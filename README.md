@@ -13,7 +13,7 @@ Si quieres operar PyRoboAdvisor, de forma automatizada puedes usar nuestro códi
 
 Dependiendo del sistema operativo que tengas, la instalación cambia levemente.
 
-- 🪟 **Windows 10/11:** [Sigue este tutorial](tutorial_windows10.md)
+- 🪟 **Windows 10/11:** [Sigue este tutorial](tutorial_windows1011.md)
 - 🍎 **macOS:** [Sigue este tutorial](tutorial_macos.md)
 - ☁️ **Google Colab (DEMO, sin instalación):** [Sigue este tutorial](tutorial_colab.md)
 
