@@ -1,4 +1,4 @@
-# **Instalación PyRoboAdvisor en Windows10**
+# **Instalación PyRoboAdvisor en Windows 10 y 11**
 
 # Paso 1º: Instalar «Python»
 
