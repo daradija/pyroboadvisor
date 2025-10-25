@@ -34,6 +34,7 @@ pra = PyRoboAdvisor(p)
 
 pra.readTickersFromWikipedia()
 pra.completeTickersWithIB()  # Completa los tickers de IB que no están en el SP500, para que pueda venderlos
+pra.completeTickersFromPortfolio(pra.posiciones)
 
 pra.prepare()  # Prepara los datos y la estrategia
 pra.simulate()
