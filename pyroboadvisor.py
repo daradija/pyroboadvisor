@@ -143,7 +143,7 @@ class PyRoboAdvisor:
                 self.hora= program["hora"]
             self.p["polygon_key"] = config.get("polygon_key", "")
             self.p["eodhd_key"] = config.get("eodhd_key", "")
-            self.p["source"] = config["source"]
+            self.p["source"] = config.get("source",0)
             config["source"] = program.get("source", config.get("source",0))
             self.Source=sourceSource[config["source"]]
             return 
@@ -256,7 +256,7 @@ class PyRoboAdvisor:
         if not desatendido:
             print("\nApalancamiento: (un número entre 0.0 y 1.8) que representa el uso del cash.")
             print("Nota: El cash incluye el 50% de la expectativa de ventas y los dolares disponibles.")
-            print("Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.")
+            # print("Nota: Primerizos, empieza con 0.2 y ve subiendo poco a poco en sucesivos días a medida que compre.")
             print(" 0   No compres hoy")
             print(" 0.2 Usa el 20% del cash")
             print(" 1   Usar todo el dinero disponible")
@@ -408,7 +408,10 @@ class PyRoboAdvisor:
 
         self.s.set_portfolio(cash,portfolio2)
 
-        orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
+        if self.signoMultiplexado is None:
+            orders=self.s.open(self.source.realTime(self.sp.symbols))
+        else:
+            orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
 
         print("\nComprar:")
         for order in orders["programBuy"]:
@@ -493,8 +496,11 @@ class PyRoboAdvisor:
         self.wait()
 
         self.s.set_portfolio(cash, portfolio)
-        
-        orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
+
+        if self.signoMultiplexado is None:
+            orders=self.s.open(self.source.realTime(self.sp.symbols))
+        else:
+            orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
 
         #d.clearOrders()
         print("\nComprar:")
