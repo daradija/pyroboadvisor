@@ -44,7 +44,7 @@ def get_parameters(config_path):
                 "hora": config.get("hora", "10:00"),
                 "puerto": int(config.get("puerto", 7467)),
                 "desatendido": True,
-                "source": int(config.get("source", 0)),
+                "source": int(config.get("source") or 0),
                 "eodhd_key": config.get("eodhd_key", ""),
                 "polygon_key": config.get("polygon_key", ""),
                 "har": int(config.get("har", 1)),

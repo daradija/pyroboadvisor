@@ -5,9 +5,9 @@ import time
 import math
 
 class DriverIB:
-    def __init__(self):
+    def __init__(self, puerto):
         self.ib = IB()
-        self.puerto=None
+        self.puerto=puerto
 
     def conectar(self,puerto):
         self.ib.connect('127.0.0.1', puerto, clientId=1)
@@ -19,7 +19,6 @@ class DriverIB:
             self.ib = None
 
     def conectar(self, desatendido=False):
-        self.ib=IB()
         if desatendido:
             reintenta = True
             while reintenta:
