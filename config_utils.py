@@ -52,6 +52,9 @@ def get_parameters(config_path):
                 "hrandom": int(config.get("hrandom", 1)),
                 "multiploMantenimiento": int(config.get("multiploMantenimiento", 6)),
                 "b": config.get("b", "True").lower() in ("true", "1", "yes"),                
+                "email": config.get("email", ""),
+                "email_destino": config.get("email_destino", ""),
+                "email_app_password": config.get("email_app_password", ""),
             }
             use_config = True
         except Exception as e:
@@ -85,5 +88,8 @@ def get_parameters(config_path):
             "eodhd_key": "",
             "polygon_key": "",
             "b": True,
+            "email_destino": "",
+            "email_app_password": "",
+            "email": "",
         }
     return p

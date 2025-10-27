@@ -23,6 +23,8 @@ import hashlib
 import functools
 from strategyClient import StrategyClient as Strategy
 
+from email import send_email
+
 def make_hash(func_name, args, kwargs):
     """Crea un hash único para la función y sus argumentos."""
     data = (func_name, tuple(sorted(kwargs.items())))
@@ -287,7 +289,7 @@ class PyRoboAdvisor:
         #self.p=config
         self.p["polygon_key"] = config.get("polygon_key", "")
         self.p["eodhd_key"] = config.get("eodhd_key", "")
-        self.p["source"] = config["source"]
+        self.p["source"] = config.get("source","")
         self.Source=sourceSource[config["source"]]
 
     def readTickersFromWikipedia(self):
@@ -413,18 +415,32 @@ class PyRoboAdvisor:
         else:
             orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
 
+        email_body = "Ordenes a ejecutar:\n\nComprar:\n"
         print("\nComprar:")
         for order in orders["programBuy"]:
             # redondea cantidad a entero y precio a 2 decimales
             precio = round(order['price'], 2)
             cantidad = int(round(order['amount']/precio))
-            print(f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}")
+            linea = f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            print(linea)
+            email_body += linea + "\n"
             
         print("\nVender:")
+        email_body += "\nVender:\n"
         for order in orders["programSell"]:
             precio = order['price']
             cantidad = order['amount']/precio
-            print(f"{cantidad:.4f} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}")
+            linea = f"{cantidad:.4f} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            print(linea)
+            email_body += linea + "\n"
+
+        send_email(
+            sender = self.p.get("email",""),
+            recipients = self.p.get("email_destino",self.p.get("email","")),
+            subject = "Órdenes de Compra y Venta",
+            body = email_body,
+            email_app_password = self.p.get("email_app_password","")
+        )
 
 
     def completeTickersWithIB(self):
