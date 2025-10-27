@@ -10,7 +10,6 @@ import sys
 import shutil
 import time
 
-import pandas as pd
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -23,7 +22,7 @@ import hashlib
 import functools
 from strategyClient import StrategyClient as Strategy
 
-from email import send_email
+from helper_email import send_email
 
 def make_hash(func_name, args, kwargs):
     """Crea un hash único para la función y sus argumentos."""
