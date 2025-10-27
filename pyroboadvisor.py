@@ -435,8 +435,8 @@ class PyRoboAdvisor:
             email_body += linea + "\n"
 
         send_email(
-            sender = self.p.get("email",""),
-            recipients = self.p.get("email_destino",self.p.get("email","")),
+            sender = self.p.get("email_remitente",""),
+            recipients = self.p.get("email_destino",self.p.get("email_remitente","")),
             subject = "Órdenes de Compra y Venta",
             body = email_body,
             email_app_password = self.p.get("email_app_password","")

@@ -25,7 +25,7 @@ multiploMantenimiento=6
 b=true
 eodhd_key=
 polygon_key=
-email= # remitente
+email_remitente= # remitente
 email_destino= # destinatario
 email_app_password= # app pwd gmail
 

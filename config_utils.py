@@ -52,7 +52,7 @@ def get_parameters(config_path):
                 "hrandom": int(config.get("hrandom", 1)),
                 "multiploMantenimiento": int(config.get("multiploMantenimiento", 6)),
                 "b": config.get("b", "True").lower() in ("true", "1", "yes"),                
-                "email": config.get("email", ""),
+                "email_remitente": config.get("email_remitente", ""),
                 "email_destino": config.get("email_destino", ""),
                 "email_app_password": config.get("email_app_password", ""),
             }
@@ -90,6 +90,6 @@ def get_parameters(config_path):
             "b": True,
             "email_destino": "",
             "email_app_password": "",
-            "email": "",
+            "email_remitente": "",
         }
     return p
