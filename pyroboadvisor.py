@@ -480,22 +480,36 @@ class PyRoboAdvisor:
 
         d.clearOrders()
 
+        email_body = "Ordenes a ejecutar:\n\nComprar:\n"
         print("\nComprar:")
         for order in orders["programBuy"]:
             # redondea cantidad a entero y precio a 2 decimales
             precio = round(order['price'], 2)
             cantidad = int(round(order['amount']/precio))
-            print(f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}")
+            linea = f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            print(linea)
+            email_body += linea + "\n"
             d.buy_limit(self.sp.symbols[order['id']], cantidad, precio)
 
         print("\nVender:")
+        email_body += "\nVender:\n"
         for order in orders["programSell"]:
             precio = order['price']
             cantidad = order['amount']/precio
-            print(f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}")
+            linea = f"{cantidad:.4f} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            print(linea)
+            email_body += linea + "\n"
             d.sell_limit(self.sp.symbols[order['id']], cantidad, precio)
 
         self.d.disconnect()
+
+        send_email(
+            sender = self.p.get("email_remitente",""),
+            recipients = self.p.get("email_destino",self.p.get("email_remitente","")),
+            subject = "Órdenes de Compra y Venta",
+            body = email_body,
+            email_app_password = self.p.get("email_app_password","")
+        )
 
     def manualIB(self):
         if self.d==None:
