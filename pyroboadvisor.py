@@ -122,8 +122,8 @@ class PyRoboAdvisor:
         if p["email"]=="" or p["key"]=="":            
             print("Debe ingresar su email y key para operar con PyRoboAdvisor.")
             print("Para obtener una key, visite https://pyroboadvisor.com")
-            email = input("Email: ").strip()
-            key = input("Key: ").strip()
+            email = input("Email: ").strip().lower()
+            key = input("Key: ").strip().lower()
             p["email"] = email
             p["key"] = key
 
