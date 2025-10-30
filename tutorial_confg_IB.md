@@ -97,3 +97,6 @@ Una forma cómoda de disposición en pantalla es dejar TWS achatado encima de VS
 Al terminar verás como van entrando las órdenes en la sección de **ACTIVAS** en directo.
 ![](assets/17618182383512.jpg)
 
+![](assets/17618182383512.jpg)
+![](assets/Órdenes_entrantes.png)
+
