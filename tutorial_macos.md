@@ -44,7 +44,7 @@ Ahora pones en el terminal el siguiente comando:\
 
 Debes escribir:
 
-`source "$HOME/pyroboadvisor/venv/bin/activate" && cd "$HOME/pyroboadvisor" && python ./sample_b.py
+`source "$HOME/venvs/pyroboadvisor/bin/activate" && cd "$HOME/pyroboadvisor" && python ./sample_b.py
 `
 
 Te pedirá Email y clave (key, te llegó a tu correo).  
