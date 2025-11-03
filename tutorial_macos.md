@@ -38,7 +38,7 @@ terminal (ctrol + J) /Ó/ (arriba) Terminal - Nuevo Terminal.\
 ![](assets/17604711982510.jpg)
 
 Ahora pones en el terminal el siguiente comando:\
-`/bin/bash -lc 'cd "$HOME/pyroboadvisor" && chmod +x setup_pyrobo_macos.sh && ./setup_pyrobo_macos.sh'`
+`cd "$HOME" && [ -d "$HOME/pyroboadvisor" ] || git clone https://github.com/daradija/pyroboadvisor.git && /bin/bash -lc 'cd "$HOME/pyroboadvisor" && chmod +x setup_pyrobo_macos.sh && ./setup_pyrobo_macos.sh'`
 
 # Paso 2º: Ejecutar simulación
 
