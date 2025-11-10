@@ -382,7 +382,16 @@ class PyRoboAdvisor:
                 break
 
         if self.verGrafica:
-            ev.print(self.s.name)
+            apal = self.p.get("apalancamiento")
+            extra = ""
+            if apal is not None:
+                pct = apal * 100
+                if pct <= 100:
+                    extra = f" ({pct:.0f}% uso del cash)"
+                else:
+                    extra = f" ({pct:.0f}% apalancamiento)"
+            ev.print(self.s.name + extra)
+
 
     def manual(self, cash, portfolio):
         portfolio2=[0]*len(self.sp.symbols)
