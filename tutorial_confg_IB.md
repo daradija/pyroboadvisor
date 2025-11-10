@@ -18,7 +18,7 @@ Lo **importante** es que dejes estos parámetros iguales cuando te aparezcan.
 ![](assets/Tipo_cuenta.png)
 
 3º TIPO DE INVERSIÓN
-![](Tipo_inversion.png)
+![](assets/Tipo_inversion.png)
 
 Finalmente una vez creada. Si eres de la UE, puedes transferir el dinero para operar con **SEPA**.
 
