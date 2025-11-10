@@ -55,7 +55,8 @@ def run():
 
         "email":"",
         "key":"",
-        "hora":"", # Coloque una hora fija entre las 10:00 y las 12:00
+        "hora":"", # Coloque una hora fija entre las 10:00 y las 12:00 
+        "apalancamiento": 1.6,  
 
         "tipo":"3",
         "source":0,
