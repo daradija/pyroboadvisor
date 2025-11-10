@@ -1,5 +1,27 @@
 # **Tutorial configuración IB**
 
+### Paso 0º Crear cuenta de Interactive Broke
+
+
+Para crear una cuenta se hace desde aquí: 
+
+Link del portal: https://www.interactivebrokers.ie/es/home.php (Sale arriba a la derecha «ABRIR CUENTA»)
+
+O si lo prefieres, directamente crear cuenta: https://www.interactivebrokers.co.uk/Universal/Application?locale=es_ES
+
+Lo **importante** es que dejes estos parámetros iguales cuando te aparezcan.
+
+1º CUENTA INDIVIDUAL    
+![](assets/Cuenta_individual.png)
+
+2º TIPO DE CUENTA - Efectivo/«Cash» VS Margen/«Margin»     
+![](assets/Tipo_cuenta.png)
+
+3º TIPO DE INVERSIÓN
+![](Tipo_inversion.png)
+
+Finalmente una vez creada. Si eres de la UE, puedes transferir el dinero para operar con **SEPA**.
+
 ### Paso 1º: Configuración portal:
 https://www.interactivebrokers.ie/sso/Login?RL=1&locale=es_ES   
 ![](assets/17618160371096.jpg)
