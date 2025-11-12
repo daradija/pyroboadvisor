@@ -53,9 +53,10 @@ def run():
 
     pra = PyRoboAdvisor(p,program={
 
-        "email":"daradija@gmail.com",
-        "key":"af1f59288f3647fcb1948b059c6b033b",
-        "hora":"09:50", # Coloque una hora fija entre las 10:00 y las 12:00
+        "email":"",
+        "key":"",
+        "hora":"", # Coloque una hora fija entre las 10:00 y las 12:00 
+        "apalancamiento": 1.6,  # Si tu cuenta es de tipo efectivo/cash, debes poner aquí 1 
 
         "tipo":"3",
         "source":0,
