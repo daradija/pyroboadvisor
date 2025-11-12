@@ -172,7 +172,13 @@ class Source:
         resultados = []  # para devolver un dict {símbolo: precio}
         for symbol in symbols:
             try:
-                ticker = yf.Ticker(symbol)
+                try:
+                    ticker = yf.Ticker(symbol)
+                except Exception as e:
+                    if symbol=="FISV":
+                        ticker = yf.Ticker("FI")
+                    else:
+                        raise e
                 # regularMarketPrice = último precio en la sesión regular
                 precio = ticker.info.get("regularMarketPrice", None)
                 if precio is None:
