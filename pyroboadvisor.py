@@ -287,7 +287,16 @@ class PyRoboAdvisor:
 
         # Obtener la columna de los símbolos/tickers
         # Aportación de @Tomeu
-        tickers = sp500['Symbol'].str.replace('.', '-').tolist()
+        try:
+            tickers = sp500['Symbol'].str.replace('.', '-').tolist()
+        except:
+            print("Error al leer los tickers de Wikipedia. Usando pyroboadvisor.org como alternativa.")
+            url = 'https://pyroboadvisor.org:443/index?numberIndex=0'
+            resp = requests.get(url, verify=False)
+            resp.raise_for_status()  # lanza excepción si hubo error HTTP
+            data = resp.json()  # -> dict con name y codes
+            self.marketName= data.get("name", "Unknown")
+            tickers= data.get("codes", [])
         # sort 
         tickers.sort()
         self.tickers = tickers
@@ -353,6 +362,9 @@ class PyRoboAdvisor:
         ev=EstrategiaValuacion()
         self.simulator=simulator
         self.ev=ev
+        pos=self.tickers.index("FI")
+        if pos >=0:
+            self.tickers[pos]="FISV"
 
     def simulate(self,signoMultiplexado=None):
         self.signoMultiplexado=signoMultiplexado
