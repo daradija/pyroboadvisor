@@ -70,7 +70,7 @@ Abre el Visual Studio Code, pulsa **control + J** para abrir terminal.
 
 Ahora as a ejecutar el instalador, copia pega en el terminal:
 
-`powershell Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force;git clone "https://github.com/daradija/pyroboadvisor.git"; Set-ExecutionPolicy Bypass -Scope Process -Force; cd "$env:USERPROFILE\pyroboadvisor"; .\setup_pyrobo.ps1 -OpenVSCode -RestartVSCode
+`powershell Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force;$env:PATH += ";C:\Program Files\Git\cmd;C:\Program Files\Git\bin";git clone "https://github.com/daradija/pyroboadvisor.git"; Set-ExecutionPolicy Bypass -Scope Process -Force; cd "$env:USERPROFILE\pyroboadvisor"; .\setup_pyrobo.ps1 -OpenVSCode -RestartVSCode
 `
 
 
