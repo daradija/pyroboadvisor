@@ -1,4 +1,4 @@
-# **Instalación PyRoboAdvisor en Windows10**
+# **Instalación PyRoboAdvisor en Windows 10 y 11**
 
 # Paso 1º: Instalar «Python»
 
@@ -8,7 +8,7 @@ Pones en el buscador « microsoft store »\
 Y le das a este:\
 ![](assets/17604714004320.jpg)
 
-En el buscador pones « python 3.11 »
+En el buscador pones « python 3.11 », si no te aparece pones el 12, no pasa nada.
 ![](assets/17604714042298.jpg)
 
 Y te pones este:\
@@ -65,77 +65,22 @@ siguiente.\
 
 # Paso 4º: Terminar instalación
 
-Abre el Visual Studio Code
-
-Le vas a dar a Extensiones y vas a añadir « Python » de Microsoft\
-![](assets/17604715311130.jpg)
-
-Ahora vas a pulsar ctrol + J, para abrir un terminal (También puedes
-arriba dándole a Terminal » New Terminal).
-
-Ahora vamos a descargar el código fuente de PyRoboAdvisor desde el
-repositorio oficial de GitHub:
-
-Escribe en el terminal:
-
-`git clone <https://github.com/daradija/pyroboadvisor.git>`
-
-`cd pyroboadvisor`
-![](assets/17604715447554.jpg)
-
-Ahora vas a poner este comando para crear un entorno virtual para que no
-tenga conflictos con otras dependencias de python:  
-`python3 -m venv venv`
-
-Luego pondrás en el terminal
-
-`venv\Scripts\activate`  
-
-![](assets/17604717104072.jpg)
+Abre el Visual Studio Code, pulsa **control + J** para abrir terminal.
 
 
-Vamos a abrir el proyecto\
+Ahora as a ejecutar el instalador, copia pega en el terminal:
 
-![](assets/17604717643745.jpg)
-![](assets/17604717751058.jpg)
+`powershell Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force;$env:PATH += ";C:\Program Files\Git\cmd;C:\Program Files\Git\bin";git clone "https://github.com/daradija/pyroboadvisor.git"; Set-ExecutionPolicy Bypass -Scope Process -Force; cd "$env:USERPROFILE\pyroboadvisor"; .\setup_pyrobo.ps1 -OpenVSCode -RestartVSCode
+`
 
-
-Abrimos sample_b.py\
-![](assets/17604717949845.jpg)
-
-Ahora le vas a dar aquí:\
-![](assets/17604718020510.jpg)
-
-En el buscador que te va a aparecer, le vas a dar a « Python: Select
-Interpreter »\
-![](assets/17604718081772.jpg)
-
-De entre las opciones que te saldrán, deberás darle a la que aparece con
-(venv)\
-![](assets/17604718217226.jpg)
-
-
-Volvemos al terminal, vas a darle a ctrol + J para invocarlo.\
-
-Vas a poner este comando:\
-`python -m pip install --upgrade pip`
-
-
-Luego vas a poner este:\
-`pip install -r requirements.txt`
-![](assets/17604718523612.jpg)
-
-Queda poco. Ahora vas a poner:\
-`cd driver`
-
-Y luego (sí, es el mismo de antes):\
-`pip install -r requirements.txt`
-
-Finalmente pon:\
-`cd ..`
-![](assets/17604719423361.jpg)
 
 **¡¡¡Ya lo tendrías instalado!!!**
+
+Abre el terminal de nuevo con **control + J** y copia pega:   
+`cd "$env:USERPROFILE\pyroboadvisor"; .\venv\Scripts\Activate.ps1; python .\sample_b.py`
+
+Guárdate este comando para cuando quieras volver a usar pyroboadvisor (simulación y operatoria diaria).
+
 
 Vamos a hacer una simulación:
 

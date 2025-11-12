@@ -27,7 +27,7 @@ Se te abrirá visual studio code.
 
 Si no te aparece con el mismo color que yo tengo no te preocupes.
 
-Le vas a dar aquí debajo, en la tuerca:\
+Le vas a dar aquí debajo, en la tuerca:   
 Tuerca - Themes - Color Theme
 
 Y te pones **Quiet Light** o el que prefieras.\
@@ -38,47 +38,14 @@ terminal (ctrol + J) /Ó/ (arriba) Terminal - Nuevo Terminal.\
 ![](assets/17604711982510.jpg)
 
 Ahora pones en el terminal el siguiente comando:\
-`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-![](assets/17604712087826.jpg)
-
-Ahora vamos a instalar python con:\
-`brew install python@3.11`
-![](assets/17604712134865.jpg)
-
-Ahora vamos a descargar el código de github con:\
-`git clone https://github.com/daradija/pyroboadvisor.git`
-
-Luego deberás poner este comando, que te situará en la carpeta que
-acabamos de importar.\
-`cd pyroboadvisor`
-![](assets/17604712219771.jpg)
-
-Ahora debes poner el siguiente comando, este ejecutará un script que
-creará un entorno virtual para evitar conflictos con otras dependencias
-de Python, el comando es:
-
-`source createVenv`
-![](assets/17604712446029.jpg)
-
-Ahora hacemos (para ir al directorio driver):
-
-`cd driver`
-
-Luego:
-
-`pip install -r requirements.txt`
-
-Finalmente volvemos al directorio anterior con:
-
-`cd ..`
-![](assets/17604712516134.jpg)
-![](assets/17604712550979.jpg)
+`cd "$HOME" && [ -d "$HOME/pyroboadvisor" ] || git clone https://github.com/daradija/pyroboadvisor.git && /bin/bash -lc 'cd "$HOME/pyroboadvisor" && chmod +x setup_pyrobo_macos.sh && ./setup_pyrobo_macos.sh'`
 
 # Paso 2º: Ejecutar simulación
 
 Debes escribir:
 
-`python ./sample_b`
+`source "$HOME/venvs/pyroboadvisor/bin/activate" && cd "$HOME/pyroboadvisor" && python ./sample_b.py
+`
 
 Te pedirá Email y clave (key, te llegó a tu correo).  
 ![](assets/17604712642268.jpg)

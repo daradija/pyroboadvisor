@@ -8,18 +8,23 @@ Tras la compra llega una clave por correo electrónico.
 
 Si quieres operar PyRoboAdvisor, de forma automatizada puedes usar nuestro código abierto que lo hace a través de la API de Interactive Brokers. Es bajo tu entera responsabilidad la ejecución y automatización de las órdenes de compra y venta. 
 
-# Instalación
+# Instalación y configuración
 
 
 Dependiendo del sistema operativo que tengas, la instalación cambia levemente.
 
-- 🪟 **Windows 10/11:** [Sigue este tutorial](tutorial_windows10.md)
+- 🪟 **Windows 10/11:** [Sigue este tutorial](tutorial_windows1011.md)
 - 🍎 **macOS:** [Sigue este tutorial](tutorial_macos.md)
 - ☁️ **Google Colab (DEMO, sin instalación):** [Sigue este tutorial](tutorial_colab.md)
 
 > **Colab es solo para DEMOSTRACIÓN**: ejecuta en la nube sin instalar nada en tu equipo.
 
 >Si necesitas ayuda, puedes usar este GPT como asistente [Asistente Instalación - PyRoboAdvisor](https://chatgpt.com/g/g-68f0cf5e1920819182e6bcbf42312b4d-pyroboadvisor-asistente-de-instalacion)
+
+Una vez instalado, para operar con nuestro código abierto:
+
+- 📊 **Configurar Interactive Broker** [Sigue este tutorial](tutorial_windows1011.md)
+
 
 # Operativa manual
 
