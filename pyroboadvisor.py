@@ -456,6 +456,23 @@ class PyRoboAdvisor:
                 sys.exit()
             d.completeTicketsWithIB(self.tickers)
             self.d=d
+
+    def completeTickersFromPortfolio(self, portfolio):
+        """
+        Añade al listado de tickers los símbolos que estén en la cartera
+        pero no estén en la lista descargada de Wikipedia.
+        Esto debe llamarse ANTES de prepare().
+        """
+        added = []
+        for symbol in portfolio.keys():
+            if symbol not in self.tickers:
+                print(f"⚠️  Añadiendo símbolo {symbol} desde el portfolio (no estaba en Wikipedia).")
+                self.tickers.append(symbol)
+                added.append(symbol)
+
+        if added:
+            # Ordenamos y eliminamos duplicados
+            self.tickers = sorted(set(self.tickers))
         
     def autoIB(self):
         if self.d==None:
