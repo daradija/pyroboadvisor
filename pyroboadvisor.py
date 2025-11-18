@@ -362,9 +362,9 @@ class PyRoboAdvisor:
         ev=EstrategiaValuacion()
         self.simulator=simulator
         self.ev=ev
-        pos=self.tickers.index("FI")
-        if pos >=0:
-            self.tickers[pos]="FISV"
+        # pos=self.tickers.index("FI")
+        # if pos >=0:
+        #     self.tickers[pos]="FISV"
 
     def simulate(self,signoMultiplexado=None):
         self.signoMultiplexado=signoMultiplexado
