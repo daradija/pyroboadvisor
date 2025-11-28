@@ -19,6 +19,10 @@ if p["b"]:
 pra = PyRoboAdvisor(p)
 
 pra.readTickersFromWikipedia()
+# Remove PARA and FI from tickers
+pra.tickers = [t for t in pra.tickers if t not in ["PARA","FI"]]
+print(f"Tickers leídos: {len(pra.tickers)}")
+# print(pra.tickers)
 print(pra.marketName)
 pra.completeTickersWithIB()  # Completa los tickers de IB que no están en el SP500, para que pueda venderlos
 
