@@ -453,9 +453,10 @@ class PyRoboAdvisor:
         print("\nVender:")
         email_body += "\nVender:\n"
         for order in orders["programSell"]:
-            precio = order["price"]
-            cantidad = order["amount"] / precio
-            linea = f"{cantidad:.4f} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            
+            precio = round(order["price"], 2)
+            cantidad = int(round(order["amount"] / precio))
+            linea = f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
             print(linea)
             email_body += linea + "\n"
 
