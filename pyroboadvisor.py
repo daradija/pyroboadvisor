@@ -527,6 +527,8 @@ class PyRoboAdvisor:
 
         self.notifyOrder(orders)
 
+        self.d.disconnect()
+
 
     def manualIB(self):
         if self.d==None:
