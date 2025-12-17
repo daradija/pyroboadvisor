@@ -437,7 +437,7 @@ class PyRoboAdvisor:
 
         self.notifyOrder(orders)
 
-    def notifyOrder(self, orders):
+    def notifyOrder(self, orders, autoIB = False):
         email_body = "Ordenes a ejecutar:\n\nComprar:\n"
         print("\nComprar:")
         for order in orders["programBuy"]:
@@ -449,6 +449,8 @@ class PyRoboAdvisor:
             )
             print(linea)
             email_body += linea + "\n"
+            if autoIB:
+                self.d.buy_limit(self.sp.symbols[order['id']], cantidad, precio)
 
         print("\nVender:")
         email_body += "\nVender:\n"
@@ -459,6 +461,8 @@ class PyRoboAdvisor:
             linea = f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
             print(linea)
             email_body += linea + "\n"
+            if autoIB:
+                self.d.sell_limit(self.sp.symbols[order["id"]], cantidad, precio)
 
         if (
             self.p.get("email_remitente")
@@ -525,7 +529,7 @@ class PyRoboAdvisor:
 
         d.clearOrders()
 
-        self.notifyOrder(orders)
+        self.notifyOrder(orders, autoIB=True)
 
         self.d.disconnect()
 

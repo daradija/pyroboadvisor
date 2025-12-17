@@ -55,6 +55,9 @@ def get_parameters(config_path):
                 "email_remitente": config.get("email_remitente", ""),
                 "email_destino": config.get("email_destino", ""),
                 "email_app_password": config.get("email_app_password", ""),
+                "telegram_apikey": config.get("telegram_apikey", ""),
+                "telegram_channelid": config.get("telegram_channelid", ""),
+                "discord_webhook": config.get("discord_webhook", ""),
             }
             use_config = True
         except Exception as e:
