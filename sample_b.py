@@ -6,7 +6,7 @@ import pandas as pd
 today = pd.Timestamp.now().normalize()
 
 # Fecha de inicio 
-start_date = today - pd.DateOffset(years=5) #(5 años antes)
+start_date = today - pd.DateOffset(years=7) #(7 años antes)
 
 # Comversión de ambas fechas a formato YYYY-MM-DD
 stoday = today.strftime("%Y-%m-%d")
