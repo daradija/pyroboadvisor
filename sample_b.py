@@ -13,7 +13,7 @@ stoday = today.strftime("%Y-%m-%d")
 sstart = start_date.strftime("%Y-%m-%d")
 
 p={
-    "fecha_inicio": sstart,
+    "fecha_inicio": "2019-01-01",
     "fecha_fin": stoday,
     "money": 10_000,
     "numberStocksInPortfolio": 10,
