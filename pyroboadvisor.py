@@ -1,10 +1,10 @@
 
-from market.source import Source
-# from market.sourceEODHD import Source as SourceEODHD
-from market.sourcePerDay import SourcePerDay
+from .market.source import Source
+# from .market.sourceEODHD import Source as SourceEODHD
+from .market.sourcePerDay import SourcePerDay
 import numpy as np
-from market.simulator import Simulator
-from market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
+from .market.simulator import Simulator
+from .market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
 import pandas as pd
 import json
 import sys
@@ -22,7 +22,7 @@ import os
 import pickle
 import hashlib
 import functools
-from strategyClient import StrategyClient as Strategy
+from .strategyClient import StrategyClient as Strategy
 
 def make_hash(func_name, args, kwargs):
     """Crea un hash único para la función y sus argumentos."""
