@@ -2,6 +2,7 @@
 
 import pandas as pd
 import os
+from vault.bitwarden import VaultwardenClient # Asignación estática porque sólo hay una implementación
 
 def parse_config(path):
     config = {}
@@ -15,6 +16,41 @@ def parse_config(path):
                 config[key.strip()] = value.split('#')[0].strip()
     return config
 
+def fetch_vault(config):
+    bitwarden_url = config.get("bitwarden_url")
+    if bitwarden_url:
+        try:
+            print("Conectando a Vaultwarden para obtener credenciales...")
+            vw_client = VaultwardenClient(bitwarden_url)
+
+            try:
+                vw_user, vw_pass = vw_client.get_credentials("pyroboadvisor")
+                if vw_user and vw_pass:
+                    config["email"] = vw_user
+                    config["key"] = vw_pass
+                print("Credenciales de pyroboadvisor recuperadas del vault")
+            except Exception as e:
+                pass
+
+            try:
+                _, gmail_app_pwd = vw_client.get_credentials("gmail_app_password")
+                if gmail_app_pwd:
+                    config["email_app_password"] = gmail_app_pwd
+                print("Gmail app password recuperado del vault")
+            except Exception as e:
+                pass
+
+            try:
+                _, telegram_api_key = vw_client.get_credentials("telegram_api_key")
+                if telegram_api_key:
+                    config["telegram_apikey"] = telegram_api_key
+                print("Telegram API key recuperado del vault")
+            except Exception as e:
+                pass
+
+        except Exception as e:
+            print(f"Error al recuperar credenciales del vault: {e}")
+
 def get_parameters(config_path):
     today = pd.Timestamp.now().normalize()
     stoday = today.strftime("%Y-%m-%d")
@@ -24,6 +60,8 @@ def get_parameters(config_path):
     if os.path.exists(config_path):
         try:
             config = parse_config(config_path)
+            fetch_vault(config)
+
             p = {
                 "fecha_inicio": config.get("fecha_inicio", "2019-01-01"),
                 "fecha_fin": stoday,
@@ -58,6 +96,7 @@ def get_parameters(config_path):
                 "telegram_apikey": config.get("telegram_apikey", ""),
                 "telegram_channelid": config.get("telegram_channelid", ""),
                 "discord_webhook": config.get("discord_webhook", ""),
+                "bitwarden_url": config.get("bitwarden_url", "")
             }
             use_config = True
         except Exception as e:
