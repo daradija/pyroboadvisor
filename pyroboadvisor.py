@@ -291,8 +291,8 @@ class PyRoboAdvisor:
         #     tickers = sp500['Symbol'].str.replace('.', '-').tolist()
         # except:
         # print("Error al leer los tickers de Wikipedia. Usando pyroboadvisor.org como alternativa.")
-        # url = 'https://pyroboadvisor.org:443/index?numberIndex=0'
-        url = 'https://localhost:443/index?numberIndex=0'
+        url = 'https://pyroboadvisor.org:443/index?numberIndex=0'
+        # url = 'https://localhost:443/index?numberIndex=0'
         resp = requests.get(url, verify=False)
         resp.raise_for_status()  # lanza excepción si hubo error HTTP
         data = resp.json()  # -> dict con name y codes
