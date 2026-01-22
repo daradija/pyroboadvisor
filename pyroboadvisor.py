@@ -281,22 +281,23 @@ class PyRoboAdvisor:
 
     def readTickersFromWikipedia(self):
         # Leer la tabla de Wikipedia
-        url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-        tablas = read_html_like(self,url)
-        sp500 = tablas[0]  # La primera tabla es la que contiene la información
+        # url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+        # tablas = read_html_like(self,url)
+        # sp500 = tablas[0]  # La primera tabla es la que contiene la información
 
         # Obtener la columna de los símbolos/tickers
         # Aportación de @Tomeu
-        try:
-            tickers = sp500['Symbol'].str.replace('.', '-').tolist()
-        except:
-            print("Error al leer los tickers de Wikipedia. Usando pyroboadvisor.org como alternativa.")
-            url = 'https://pyroboadvisor.org:443/index?numberIndex=0'
-            resp = requests.get(url, verify=False)
-            resp.raise_for_status()  # lanza excepción si hubo error HTTP
-            data = resp.json()  # -> dict con name y codes
-            self.marketName= data.get("name", "Unknown")
-            tickers= data.get("codes", [])
+        # try:
+        #     tickers = sp500['Symbol'].str.replace('.', '-').tolist()
+        # except:
+        # print("Error al leer los tickers de Wikipedia. Usando pyroboadvisor.org como alternativa.")
+        # url = 'https://pyroboadvisor.org:443/index?numberIndex=0'
+        url = 'https://localhost:443/index?numberIndex=0'
+        resp = requests.get(url, verify=False)
+        resp.raise_for_status()  # lanza excepción si hubo error HTTP
+        data = resp.json()  # -> dict con name y codes
+        self.marketName= data.get("name", "Unknown")
+        tickers= data.get("codes", [])
         # sort 
         tickers.sort()
         self.tickers = tickers

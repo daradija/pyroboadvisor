@@ -62,7 +62,7 @@ pra = PyRoboAdvisor(p)
 
 pra.readTickersFromWikipedia()
 # Remove PARA and FI from tickers
-pra.tickers = [t for t in pra.tickers if t not in ["PARA","FI"]]
+pra.tickers = [t for t in pra.tickers if t not in ["PARA","FI","MMC"]]
 print(f"Tickers leídos: {len(pra.tickers)}")
 # print(pra.tickers)
 print(pra.marketName)
