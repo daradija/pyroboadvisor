@@ -2,17 +2,20 @@
 from pyroboadvisor import PyRoboAdvisor
 import pandas as pd
 
+# Fecha actual normalizada (sin hora)
 today = pd.Timestamp.now().normalize()
-stoday = today.strftime("%Y-%m-%d")
 
-# stoday="2025-08-30"
-# print("***********************")
-# print("PELIGRO FECHA BLOQUEADA")
+# Fecha de inicio 
+start_date = today - pd.DateOffset(years=7) #(7 años antes)
+
+# Comversión de ambas fechas a formato YYYY-MM-DD
+stoday = today.strftime("%Y-%m-%d")
+sstart = start_date.strftime("%Y-%m-%d")
 
 p={
     "fecha_inicio": "2019-01-01",
     "fecha_fin": stoday,
-    "money": 100000,
+    "money": 10_000,
     "numberStocksInPortfolio": 10,
     "orderMarginBuy": 0.005,  # margen de ordenes de compra y venta
     "orderMarginSell": 0.005,  # margen de ordenes de compra y venta
