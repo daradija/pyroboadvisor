@@ -281,9 +281,9 @@ class PyRoboAdvisor:
 
     def readTickersFromWikipedia(self):
         # Leer la tabla de Wikipedia
-        url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-        tablas = read_html_like(self,url)
-        sp500 = tablas[0]  # La primera tabla es la que contiene la información
+        # url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+        # tablas = read_html_like(self,url)
+        # sp500 = tablas[0]  # La primera tabla es la que contiene la información
 
         # Obtener la columna de los símbolos/tickers
         # Aportación de @Tomeu
