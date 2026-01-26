@@ -44,6 +44,15 @@ Poned como **Divisa base** - USD
 
 Con esto ya habríamos terminado con la configuración del portal.
 
+Quedaría ingresar dinero, arriba aparece «Transferencias y pagos».
+![](assets/transf_fondos.png)
+
+Luego se le daría a depositar fondos.
+![](assets/transf_fondos2.png)
+
+Al darle te saldrán varios métodos, si eres de la UE, SEPA funciona muy bien.
+Es cuestión de seguir las instrucciones que se te muestran.
+
 ### Paso 2º: Configuración Trade Work Station (TWS):
 
 Descargar el programa:
@@ -100,18 +109,55 @@ Y en OPERACIONES:
 ![](assets/17618183004858.jpg)
 Saldrían aquellas que ya se han ejecutado hoy.
 
+Una vez hecho eso, ya estaría todo configurado.
 
-Una vez hecho eso, ya estaría todo perfecto.
+Para operar necesitamos USD, por lo que para pasar de EUR a USD por ejemplo deberíamos hacer lo siguiente.
 
-Sería cuestión de abrir el Visual Studio Code.
+Primero debemos haber hecho ya una transferencia de fondos, nos aparecerá la cantidad que tenemos en la sección de «Portfolio», que aparece a la derecha.
+
+![](assets/portfolio2.png)
+
+Vamos a convertirlos, arriba a la izquierda en esa sección.
+![](assets/order_entry.png)
+
+Justo debajo de donde pone «ORDER ENTRY», vamos a quitar lo que haya y vamos a poner **EUR.USD**
+![](assets/order_entry2.png)
+
+![](assets/EUR.USD.png)
+
+Supongamos que has transferido 2500€, pues en QTY (Quantity) pones la cantidad de euros que quieres convertir, si te da problemas ve probando a quitar 1, 2, 3 euros, para que te deje (la comisión).
+
+Una vez lo tengas hecho debes hacer:   
+(Regla nemotécnica para que te acuerdes).   
+
+Queremos Vender (SELL), SELL está en la **derecha**,    
+le damos a ASK (que está a la **derecha** de bid)    
+
+y luego rápidamente a **SUBMIT**.
+![](assets/SELL_Y_ASK.png)
+
+Aceptamos lo que nos salga y listo, se nos ejecutará la orden de venta y tendremos nuestros USDs.
+
+Ahora para ejecutar sería cuestión de abrir el Visual Studio Code.
 
 Abrir terminal.
 
-Para el diario:   
-`cd "$env:USERPROFILE\pyroboadvisor"; .\venv\Scripts\Activate.ps1; python sample_b.py` 
+**Ejecución Diaria (sample_b.py):**
 
-Para el semanal:   
-`cd "$env:USERPROFILE\pyroboadvisor"; .\venv\Scripts\Activate.ps1; python daemon.py` 
+Windows: (ctrl + J) y pega lo siguiente:   
+`cd "$env:USERPROFILE\pyroboadvisor"; .\venv\Scripts\Activate.ps1; python .\sample_b.py`
+
+macOS: (en Terminal -> New Terminal) y pega lo siguiente:    
+`source "$HOME/venvs/pyroboadvisor/bin/activate" && cd "$HOME/pyroboadvisor" && python ./sample_b.py`
+
+**Ejecución Semanal (daemon.py) (requiere modificar un fichero, mira [tutorial](https://www.youtube.com/watch?v=se6P33WhZrc)):**
+
+
+Windows: (ctrl + J) y pega lo siguiente:   
+`cd "$env:USERPROFILE\pyroboadvisor"; .\venv\Scripts\Activate.ps1; python .\daemon.py`
+
+macOS: (en Terminal -> New Terminal) y pega lo siguiente:   
+`source "$HOME/venvs/pyroboadvisor/bin/activate" && cd "$HOME/pyroboadvisor" && python ./daemon.py`
 
 Una forma cómoda de disposición en pantalla es dejar TWS achatado encima de VS Code y ir viendo como carga.
 ![](assets/17618189433881.jpg)
