@@ -5,7 +5,7 @@ from market.sourcePerDay import SourcePerDay
 import numpy as np
 from market.simulator import Simulator
 from market.evaluacion import EstrategiaValuacionConSP500 as EstrategiaValuacion
-import pandas as pd
+import threading
 import json
 import sys
 import shutil
@@ -199,6 +199,7 @@ class PyRoboAdvisor:
             self.apalancamiento=None
 
         if self.tipo in ["1"]:
+            """ # [2026-01-26] Quitado, para mejora
             stoday = str(pd.Timestamp.now().normalize())[:10]
             if cash is None or posiciones is None or date != stoday:
                 print("\nDebes incluir el dinero disponible, fecha de hoy, y las posiciones de cartera en la llamada (sample.py)")
@@ -212,6 +213,9 @@ class PyRoboAdvisor:
                 sys.exit()
             self.cash = cash
             self.posiciones = posiciones
+            """
+
+            self.cash, self.posiciones = self._manual_capture_portfolio()
 
         if self.tipo in ["1", "2", "3", "4"]:
             # Ajusta la fecha de incio y fin
@@ -280,6 +284,7 @@ class PyRoboAdvisor:
         self.Source=sourceSource[config["source"]]
 
     def readTickersFromWikipedia(self):
+        """ # Puesto como comentario [2026-01-27]
         # Leer la tabla de Wikipedia
         # url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
         # tablas = read_html_like(self,url)
@@ -311,6 +316,20 @@ class PyRoboAdvisor:
         #     self.sp.size = len(tickers)
 
         #self.source=Source
+        """
+        url = "https://pyroboadvisor.org:443/index?numberIndex=0"
+
+        data = get_json_with_feedback(
+            url,
+            verify=False,
+            max_attempts=5, 
+            timeout=(25, 500)
+        )
+
+        self.marketName = data.get("name", "Unknown")
+        tickers = data.get("codes", [])
+        tickers.sort()
+        self.tickers = tickers
 
     def readTickersFromEODHD(self,index=0):
         url="https://127.0.0.1:443/index?numberIndex="+str(index)
@@ -404,37 +423,177 @@ class PyRoboAdvisor:
                     extra = f" ({pct:.0f}% apalancamiento)"
             ev.print(self.s.name + extra)
 
+    def _manual_capture_portfolio(self):
+        opcion = ""
+        while opcion not in ("1", "2"):
+            print("\nManual:")
+            print(" 1. Leer cartera desde archivo (manual.txt)")
+            print(" 2. Introducir cartera manualmente")
+            opcion = input("Seleccione (1-2): ").strip()
+
+        if opcion == "1":
+            return self._leer_manual_txt("manual.txt")
+        return self._pedir_cartera_por_consola()
+
+    def _leer_manual_txt(self, filepath: str):
+        """
+        - Ignora TODO lo que esté entre dos líneas delimitadoras de # (>=80 chars).
+        - Se queda con la ÚLTIMA sección encontrada tras una línea de CASH (reinicia cartera al ver CASH).
+        - Al final muestra lo leído y pide confirmación.
+        """
+        import os, sys, re
+
+        if not os.path.exists(filepath):
+            print(f"No existe el archivo {filepath}.")
+            sys.exit()
+
+        cash = None
+        posiciones = {}
+
+        cash_re = re.compile(
+            r"^\s*(cash|efectivo|dinero)\s*[:=]?\s*([-+]?\d+(\.\d+)?)\s*$",
+            re.I
+        )
+
+        def es_delimitador_hash(line: str) -> bool:
+            s = line.strip()
+            return len(s) >= 80 and set(s) == {"#"}
+
+        def parse_position(line: str):
+            parts = re.split(r"[,\s:;=]+", line.strip())
+            if len(parts) < 2:
+                return None
+            sym = parts[0].strip().upper()
+            if sym in ("CASH", "EFECTIVO", "DINERO"):
+                return None
+            try:
+                qty = float(parts[1])
+            except ValueError:
+                return None
+            return sym, qty
+
+        ignorar = False
+        with open(filepath, "r", encoding="utf-8") as f:
+            for raw in f:
+                line = raw.strip()
+                if not line:
+                    continue
+
+                if es_delimitador_hash(line):
+                    ignorar = not ignorar
+                    continue
+                if ignorar:
+                    continue
+
+                if line.startswith("#"):
+                    continue
+
+                m = cash_re.match(line)
+                if m:
+                    cash = float(m.group(2))
+                    posiciones = {}  # nueva sección => “ignora ejemplo” si estaba antes
+                    continue
+
+                parsed = parse_position(line)
+                if parsed:
+                    sym, qty = parsed
+                    posiciones[sym] = posiciones.get(sym, 0.0) + qty
+
+        if cash is None:
+            print(f"No se encontró una línea CASH válida en {filepath}.")
+            sys.exit()
+        if not posiciones:
+            print(f"Se leyó CASH={cash}, pero no hay posiciones en {filepath}.")
+            sys.exit()
+
+        # Confirmación por terminal
+        print("\nHe leído esto:")
+        print(f"Cash: {cash}")
+        for sym, qty in sorted(posiciones.items()):
+            print(f"  {sym}: {qty}")
+        ok = input("¿Es correcto? (s/n): ").strip().lower()
+        if ok not in ("s", "si", "sí", "y", "yes"):
+            print("Abortado. Corrige manual.txt o elige introducir manualmente.")
+            sys.exit()
+
+        return cash, posiciones
+
+
+    def _pedir_cartera_por_consola(self):
+        import sys
+
+        while True:
+            s = input("\nCash disponible (USD): ").strip().replace(",", "")
+            try:
+                cash = float(s)
+                break
+            except ValueError:
+                print("Cash inválido. Ejemplo: 12345.67")
+
+        posiciones = {}
+        print("\nIntroduce posiciones. Escribe FIN para terminar.")
+        while True:
+            sym = input("Ticker: ").strip().upper()
+            if sym in ("", "FIN", "END", "DONE", "SALIR", "0"):
+                break
+            if sym.startswith("#"):
+                continue
+
+            while True:
+                q = input(f"Cantidad de {sym}: ").strip().replace(",", "")
+                try:
+                    qty = float(q)
+                    break
+                except ValueError:
+                    print("Cantidad inválida. Ejemplo: 10")
+
+            posiciones[sym] = posiciones.get(sym, 0.0) + qty
+
+        if not posiciones:
+            print("No se introdujeron posiciones. Abortando.")
+            sys.exit()
+
+        return cash, posiciones
+
 
     def manual(self, cash, portfolio):
-        portfolio2=[0]*len(self.sp.symbols)
-        for symbol,num in portfolio.items():
-            ind= self.sp.symbols.index(symbol)
-            if ind >= 0:
-                portfolio2[ind] = num
-            else:
+        portfolio2 = [0] * len(self.sp.symbols)
+
+        for symbol, num in portfolio.items():
+            try:
+                ind = self.sp.symbols.index(symbol)
+            except ValueError:
                 print(f"Símbolo {symbol} no encontrado en la lista de símbolos de entrenamiento. No emitirá señales de venta")
+                continue
+            portfolio2[ind] = num
 
         self.wait()
-
-        self.s.set_portfolio(cash,portfolio2)
+        self.s.set_portfolio(cash, portfolio2)
 
         if self.signoMultiplexado is None:
-            orders=self.s.open(self.source.realTime(self.sp.symbols))
+            orders = self.s.open(self.source.realTime(self.sp.symbols))
         else:
-            orders=self.s.open(self.source.realTime(self.sp.symbols),[sm(self.sp.current) for sm in self.signoMultiplexado])
+            orders = self.s.open(
+                self.source.realTime(self.sp.symbols),
+                [sm(self.sp.current) for sm in self.signoMultiplexado]
+            )
 
         print("\nComprar:")
         for order in orders["programBuy"]:
-            # redondea cantidad a entero y precio a 2 decimales
-            precio = round(order['price'], 2)
-            cantidad = int(round(order['amount']/precio))
+            precio = round(order["price"], 2)
+            if precio == 0:
+                continue
+            cantidad = int(round(order["amount"] / precio))
             print(f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}")
-            
+
         print("\nVender:")
         for order in orders["programSell"]:
-            precio = order['price']
-            cantidad = order['amount']/precio
+            precio = order["price"]
+            if precio == 0:
+                continue
+            cantidad = order["amount"] / precio
             print(f"{cantidad:.4f} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}")
+
 
 
     def completeTickersWithIB(self):
@@ -599,3 +758,58 @@ if __name__ == "__main__":
     my_dir = os.path.join(root, "pyroboadvisor")
     os.makedirs(my_dir, exist_ok=True)
     print("Ruta personalizada:", my_dir)
+
+
+def get_json_with_feedback(url, *, verify=False, max_attempts=4, timeout=(25, 300)):
+    connect_s, read_s = timeout if isinstance(timeout, tuple) else (timeout, timeout)
+
+    def _get_with_live_counter():
+        out = {"resp": None, "err": None}
+
+        def worker():
+            try:
+                out["resp"] = requests.get(url, verify=verify, timeout=(connect_s, read_s))
+            except Exception as e:
+                out["err"] = e
+
+        th = threading.Thread(target=worker, daemon=True)
+        th.start()
+
+        t0 = time.time()
+        while th.is_alive():
+            elapsed = int(time.time() - t0)
+            # “misma lógica” que wait(): se actualiza en la misma línea
+            print(f"⏳ Esperando tickers... {elapsed}/{int(read_s)}s", end="\r", flush=True)
+            time.sleep(1)
+
+        # limpiar línea
+        print(" " * 60, end="\r")
+
+        if out["err"] is not None:
+            raise out["err"]
+        return out["resp"], time.time() - t0
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            if attempt == 1:
+                print(f"📡 Pidiendo tickers: {url} (Puede tardar varios minutos)", flush=True)
+            else:
+                print(f"📡 Reintento {attempt}/{max_attempts}: {url}", flush=True)
+
+            resp, dt = _get_with_live_counter()
+            resp.raise_for_status()
+
+            size_kb = len(resp.content) / 1024
+            print(f"✅ Tickers recibidos en {dt:.1f}s ({size_kb:.1f} KB)", flush=True)
+            return resp.json()
+
+        except requests.exceptions.ReadTimeout:
+            print("⏳ Timeout. Reintentando...", flush=True)
+
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error: {e}", flush=True)
+            if attempt == max_attempts:
+                raise
+            print("🔁 Reintentando...", flush=True)
+
+    raise RuntimeError("No se pudo descargar el JSON tras reintentos")

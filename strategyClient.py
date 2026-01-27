@@ -95,6 +95,7 @@ class StrategyClient:
 
         return self.session_id
 
+    """
     def open(self, open20,signoMultiplexado=None):
         if not self.session_id:
             raise Exception("Session not created")
@@ -104,6 +105,61 @@ class StrategyClient:
         resp = self.requests_session.post(f"{self.api_url}/sessions/{self.session_id}/open", json=payload, verify=self.verify_ssl,timeout=timeout )
         resp.raise_for_status()
         return resp.json()  # {'programSell': [...], 'programBuy': [...]}
+    """
+
+    def open(self, open20, signoMultiplexado=None):
+        import requests, time
+
+        if not self.session_id:
+            raise Exception("Session not created")
+
+        payload = {"open20": list(open20)}
+        if signoMultiplexado is not None:
+            payload["signoMultiplexado"] = signoMultiplexado
+
+        max_attempts = 8
+        base_wait = 2  # segundos
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                # Solo mostramos mensajes desde el intento 2
+                if attempt >= 2:
+                    if attempt == 2:
+                        print(f"[open] intento 1/{max_attempts} ha fallado (timeout). Reintentando...")
+                    print(f"[open] intento {attempt}/{max_attempts} → {self.api_url}")
+
+                resp = self.requests_session.post(
+                    f"{self.api_url}/sessions/{self.session_id}/open",
+                    json=payload,
+                    verify=self.verify_ssl,
+                    timeout=(10, timeout)
+                )
+                resp.raise_for_status()
+
+                if attempt >= 2:
+                    print("[open] OK")
+
+                return resp.json()
+
+            except requests.exceptions.ReadTimeout:
+                wait_s = base_wait * (2 ** (attempt - 1))  # 2,4,8,16,32
+
+                # Solo avisamos del timeout desde el intento 2 (porque el 1 se omite)
+                if attempt >= 2:
+                    print(f"[open] timeout. Reintentando en {wait_s}s...")
+
+                time.sleep(wait_s)
+
+            except requests.exceptions.RequestException as e:
+                # Para errores no-timeout: si ocurren en el intento 1, saldrá sin log; si quieres log siempre, dímelo.
+                if attempt >= 2:
+                    print(f"[open] error: {e}")
+                raise
+
+        raise requests.exceptions.ReadTimeout(
+            f"Timeout en open() tras {max_attempts} intentos (api={self.api_url})"
+        )
+
 
     def execute(self, low, high, close, date,volume=None):
         if not self.session_id:

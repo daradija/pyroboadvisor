@@ -1,0 +1,25 @@
+####################################################################################
+# Ejemplo (este lo ignora ya que está entre filas de «#» de 80 de longitud)
+
+cash: 1000
+AAPL 20
+MSFT 10
+GOOGL 5
+
+# Debes modificar el que está debajo, y ponerlo como tienes tu cartera.
+# Luego al arrancar sample_b.py le darás a las siguientes opciones:
+1. Manual
+1. Leer cartera desde archivo (manual.txt)
+
+# ES EL SIGUIENTE=(ABAJO) QUE TIENES QUE MODIFICAR:
+#####################################################################################
+
+cash: 3250
+TSLA 11
+AAPL 1
+AMZN 2
+GOOGL 16
+META 4
+NVDA 3
+JPM 4
+MSFT 11
