@@ -120,7 +120,7 @@ Primero debemos haber hecho ya una transferencia de fondos, nos aparecerá la ca
 Vamos a convertirlos, arriba a la izquierda en esa sección.
 ![](assets/order_entry.png)
 
-Justo debajo de donde pone «ORDER ENTRY», vamos a quitar lo que haya y vamos a poner **EUR.USD**
+Justo debajo de donde pone «ORDER ENTRY», vamos a quitar lo que haya y vamos a poner **EUR.USD**   
 ![](assets/order_entry2.png)
 
 ![](assets/EUR.USD.png)
@@ -133,7 +133,7 @@ Una vez lo tengas hecho debes hacer:
 Queremos Vender (SELL), SELL está en la **derecha**,    
 le damos a ASK (que está a la **derecha** de bid)    
 
-y luego rápidamente a **SUBMIT**.
+y luego rápidamente a **SUBMIT**.   
 ![](assets/SELL_Y_ASK.png)
 
 Aceptamos lo que nos salga y listo, se nos ejecutará la orden de venta y tendremos nuestros USDs.

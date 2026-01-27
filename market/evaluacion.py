@@ -615,13 +615,16 @@ class EstrategiaValuacionConSP500:
             # Descarga datos del S&P 500 usando yfinance
             data = self._yf.download(self.sp500_ticker, start=start_str, end=end_str, progress=False)
             
+            # CAMBIO [2026-01-26]
             # Normalización de columnas: yfinance a veces devuelve MultiIndex
             # Esto asegura que trabajamos con un DataFrame de columnas simples
+            # yfinance a veces devuelve columnas MultiIndex -> 'Adj Close' sale como Series
             if isinstance(data.columns, pd.MultiIndex):
                 try:
                     data = data.xs(self.sp500_ticker, axis=1, level=1)
                 except Exception:
                     data.columns = data.columns.get_level_values(0)
+            
                     
         except Exception as e:
             # En caso de error en la descarga, muestra solo la estrategia
