@@ -60,13 +60,18 @@ CLASE PRINCIPAL: EstrategiaValuacionConSP500 (Sistema completo de análisis)
 │   ├── print[7.] PREPROCESAMIENTO DE DATOS DEL S&P 500
 │   ├── print[8.] CONSTRUCCIÓN DE LA SERIE DE PRECIOS DEL S&P 500 SINCRONIZADA
 │   ├── print[9.] ESCALADO DEL S&P 500 PARA COMPARACIÓN VISUAL
-│   └── print[10.] GENERACIÓN DE LOS 6 GRÁFICOS DE ANÁLISIS:
+│   └── print[10.] GENERACIÓN DE LOS 11 GRÁFICOS DE ANÁLISIS:
 │       ├── print[10.1] Gráfico 1: Comparativa en escala lineal (plot_series con log=False)
 │       ├── print[10.2] Gráfico 2: Comparativa en escala logarítmica (plot_series con log=True)
-│       ├── print[10.3] Gráfico 3: Dispersión de retornos diarios (dotComparativo)
-│       ├── print[10.4] Gráfico 4: Heatmap de rentabilidades mensuales simples (plot_heatmap_mensual_anual con log=False)
-│       ├── print[10.5] Gráfico 5: Heatmap de rentabilidades mensuales logarítmicas (plot_heatmap_mensual_anual con log=True)
-│       └── print[10.6] Gráfico 6: Histograma de distribución de retornos diarios (plot_hist_retornos)
+│       ├── print[10.3] Gráfico 3: Rentabilidad últimos 30 días (plot_comparacion_acumulada_ultimos con log=False)
+│       ├── print[10.4] Gráfico 4: Rentabilidad últimos 30 días logarítmica (plot_comparacion_acumulada_ultimos con log=True)
+│       ├── print[10.5] Gráfico 5: Dispersión de retornos diarios (dotComparativo)
+│       ├── print[10.6] Gráfico 6: Heatmap de rentabilidades mensuales simples (plot_heatmap_mensual_anual con log=False)
+│       ├── print[10.7] Gráfico 7: Heatmap de rentabilidades mensuales logarítmicas (plot_heatmap_mensual_anual con log=True)
+│       ├── print[10.8] Gráfico 8: Histograma de distribución de retornos diarios (plot_hist_retornos)
+│       ├── print[10.9] Gráfico 9: Curva de drawdown (plot_drawdown)
+│       ├── print[10.10] Gráfico 10: Ruido de rentabilidades normal (plot_ruido_rentabilidades con log=False)
+│       └── print[10.11] Gráfico 11: Ruido de rentabilidades logarítmico (plot_ruido_rentabilidades con log=True)
 │
 ├── [UTIL] _get_unified_colormap(vmin, vmax)
 │   └── Función auxiliar: Crea colormap unificado con colores fijos
@@ -720,33 +725,33 @@ class EstrategiaValuacionConSP500:
         
         # print[10.2] Gráfico 2: Comparativa en escala logarítmica
         self.plot_series(fechas_ord, valores_ord, sp500_escalada, strategy_name, log=True)
-        
-        # print[10.3] Gráfico 3: Dispersión de retornos diarios con regresión lineal
-        self.dotComparativo(valores_ord, sp500_raw_list, strategy_name)
-        
-        # print[10.4] Gráfico 4: Heatmap de rentabilidades mensuales (simple)
-        self.plot_heatmap_mensual_anual(fechas_ord, returns_ord, strategy_name, log=False)
-        
-        # print[10.5] Gráfico 5: Heatmap de rentabilidades mensuales (logarítmico)
-        self.plot_heatmap_mensual_anual(fechas_ord, returns_ord, strategy_name, log=True)
-        
-        # print[10.6] Gráfico 6: Histograma de distribución de retornos diarios
-        self.plot_hist_retornos(strategy_name)
 
-        # print[10.7] Gráfico 7: Curva de drawdown
-        self.plot_drawdown(fechas_ord, valores_ord, strategy_name)
-
-        # print[10.8] Gráfico 8: Ruido de rentabilidades (normal)
-        self.plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, log=False)
-
-        # print[10.9] Gráfico 9: Ruido de rentabilidades (log)
-        self.plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, log=True)
-
-        # print[10.11] Gráfico 11: Rentabilidad últimos 30 días 
+        # print[10.3] Gráfico 3: Rentabilidad últimos 30 días 
         self.plot_comparacion_acumulada_ultimos(fechas_ord, valores_ord, sp500_escalada, strategy_name, dias=30, log=False)
         
-        # print[10.12] Gráfico 12: Rentabilidad últimos 30 días (log)
+        # print[10.4] Gráfico 4: Rentabilidad últimos 30 días (log)
         self.plot_comparacion_acumulada_ultimos(fechas_ord, valores_ord, sp500_escalada, strategy_name, dias=30, log=True)
+        
+        # print[10.5] Gráfico 5: Dispersión de retornos diarios con regresión lineal
+        self.dotComparativo(valores_ord, sp500_raw_list, strategy_name)
+        
+        # print[10.6] Gráfico 6: Heatmap de rentabilidades mensuales (simple)
+        self.plot_heatmap_mensual_anual(fechas_ord, returns_ord, strategy_name, log=False)
+        
+        # print[10.7] Gráfico 7: Heatmap de rentabilidades mensuales (logarítmico)
+        self.plot_heatmap_mensual_anual(fechas_ord, returns_ord, strategy_name, log=True)
+        
+        # print[10.8] Gráfico 8: Histograma de distribución de retornos diarios
+        self.plot_hist_retornos(strategy_name)
+
+        # print[10.9] Gráfico 9: Curva de drawdown
+        self.plot_drawdown(fechas_ord, valores_ord, strategy_name)
+
+        # print[10.10] Gráfico 10: Ruido de rentabilidades (normal)
+        self.plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, log=False)
+
+        # print[10.11] Gráfico 11: Ruido de rentabilidades (log)
+        self.plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, log=True)
 
 
     def _get_unified_colormap(self, vmin, vmax):
@@ -1318,4 +1323,42 @@ class EstrategiaValuacionConSP500:
         plt.grid(True)
         plt.show()
 
+    def plot_comparacion_acumulada_ultimos(self, fechas_ord, valores_ord, sp500_escalada, strategy_name, *, dias=30, log=False):
+
+        n = min(dias, len(valores_ord))
+        if n < 2:
+            print("No hay datos suficientes para la comparación acumulada.")
+            return
+
+        f = fechas_ord[-n:]
+        s = np.array(valores_ord[-n:], dtype=float)
+        b = np.array(sp500_escalada[-n:], dtype=float)
+
+        s0, b0 = s[0], b[0]
+        if s0 <= 0 or b0 <= 0:
+            print("Valores iniciales inválidos para normalizar.")
+            return
+
+        if log:
+            # acumulado log: ln(Vt/V0)
+            s_ret = np.log(s / s0) * 100.0
+            b_ret = np.log(b / b0) * 100.0
+            titulo = f"Comparación de referencia acumulada (log) - últimos {n} días"
+            ylabel = "Retorno acumulado log (%)"
+        else:
+            # acumulado simple: (Vt/V0 - 1)
+            s_ret = (s / s0 - 1.0) * 100.0
+            b_ret = (b / b0 - 1.0) * 100.0
+            titulo = f"Comparación de referencia acumulada (simple) - últimos {n} días"
+            ylabel = "Retorno acumulado (%)"
+
+        plt.figure()
+        plt.plot(f, s_ret, label=strategy_name)
+        plt.plot(f, b_ret, label="S&P 500")
+        plt.title(titulo)
+        plt.xlabel("Fecha")
+        plt.ylabel(ylabel)
+        plt.grid(True)
+        plt.legend()
+        plt.show()
 
