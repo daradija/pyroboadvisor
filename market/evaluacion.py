@@ -733,6 +733,22 @@ class EstrategiaValuacionConSP500:
         # print[10.6] Gráfico 6: Histograma de distribución de retornos diarios
         self.plot_hist_retornos(strategy_name)
 
+        # print[10.7] Gráfico 7: Curva de drawdown
+        self.plot_drawdown(fechas_ord, valores_ord, strategy_name)
+
+        # print[10.8] Gráfico 8: Ruido de rentabilidades (normal)
+        self.plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, log=False)
+
+        # print[10.9] Gráfico 9: Ruido de rentabilidades (log)
+        self.plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, log=True)
+
+        # print[10.11] Gráfico 11: Rentabilidad últimos 30 días 
+        self.plot_comparacion_acumulada_ultimos(fechas_ord, valores_ord, sp500_escalada, strategy_name, dias=30, log=False)
+        
+        # print[10.12] Gráfico 12: Rentabilidad últimos 30 días (log)
+        self.plot_comparacion_acumulada_ultimos(fechas_ord, valores_ord, sp500_escalada, strategy_name, dias=30, log=True)
+
+
     def _get_unified_colormap(self, vmin, vmax):
         """
         Crea un colormap unificado con los colores especificados.
@@ -1238,3 +1254,68 @@ class EstrategiaValuacionConSP500:
         # Ajusta márgenes y muestra el gráfico
         plt.tight_layout()
         plt.show()
+
+    def plot_drawdown(self, fechas_ord, valores_ord, strategy_name):
+
+        v = np.array(valores_ord, dtype=float)
+        peak = np.maximum.accumulate(v)
+        dd = v / peak - 1.0  # <= 0
+
+        # max drawdown
+        max_dd = float(dd.min())  # negativo
+
+        # duración máxima (días) desde pico hasta recuperación
+        underwater = dd < 0
+        max_dur = 0
+        cur = 0
+        for u in underwater:
+            if u:
+                cur += 1
+                if cur > max_dur:
+                    max_dur = cur
+            else:
+                cur = 0
+
+        plt.figure()
+        plt.plot(fechas_ord, dd * 100.0)
+        plt.axhline(0)
+        plt.title(f"Drawdown - Estrategia {strategy_name}\nMaxDD: {max_dd*100:.2f}% | Duración máx: {max_dur} días")
+        plt.ylabel("Drawdown (%)")
+        plt.xlabel("Fecha")
+        plt.grid(True)
+        plt.show()
+
+    def plot_ruido_rentabilidades(self, fechas_ord, valores_ord, strategy_name, *, log=False):
+        v = np.array(valores_ord, dtype=float)
+        f = np.array(fechas_ord)
+
+        if len(v) < 2:
+            print("No hay datos suficientes para graficar rentabilidades.")
+            return
+
+        # Retornos: simple o log
+        prev = v[:-1]
+        cur = v[1:]
+
+        if log:
+            r = np.full(len(cur), np.nan, dtype=float)
+            ok = (prev > 0) & (cur > 0)
+            r[ok] = np.log(cur[ok] / prev[ok])
+            titulo = f"Gráfico de ruido de rentabilidades (log) - {strategy_name}"
+            ylabel = "Rentabilidad log diaria (%)"
+        else:
+            r = (cur / prev) - 1.0
+            titulo = f"Gráfico de ruido de rentabilidades - {strategy_name}"
+            ylabel = "Rentabilidad diaria (%)"
+
+        fechas = f[1:]
+
+        plt.figure()
+        plt.plot(fechas, r * 100.0)  # conectando puntos
+        plt.title(titulo)
+        plt.xlabel("Fecha")
+        plt.ylabel(ylabel)
+        plt.grid(True)
+        plt.show()
+
+
