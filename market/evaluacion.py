@@ -7,8 +7,17 @@ from matplotlib.colors import LinearSegmentedColormap  # <-- NUEVO IMPORT
 
 """
 =======================================
-Estructura
+Estructura Completa del Sistema
 =======================================
+
+MÓDULOS IMPORTADOS:
+├── datetime: datetime, date, timedelta
+├── pandas: pd
+├── matplotlib.pyplot: plt
+├── math
+├── numpy: np
+└── matplotlib.colors: LinearSegmentedColormap
+
 
 CLASE PRINCIPAL: SharpeLog (Cálculo incremental del ratio de Sharpe)
 │
@@ -50,7 +59,7 @@ CLASE PRINCIPAL: EstrategiaValuacionConSP500 (Sistema completo de análisis)
 │   ├── ADD[4.] RETORNO: Calcular retorno logarítmico diario
 │   └── ADD[5.] ALMACENAMIENTO: Guardar fecha y valor
 │
-├── [PRINT] print(strategy_name) - GENERA 6 GRÁFICOS DE ANÁLISIS
+├── [PRINT] print(strategy_name)
 │   ├── print[1.] VALIDACIÓN INICIAL: Comprobar si hay datos de estrategia
 │   ├── print[2.] ORDENACIÓN Y PREPARACIÓN DE DATOS DE ESTRATEGIA
 │   ├── print[3.] VERIFICACIÓN DE DISPONIBILIDAD DE YFINANCE
@@ -97,16 +106,44 @@ CLASE PRINCIPAL: EstrategiaValuacionConSP500 (Sistema completo de análisis)
 │   ├── heatmap[6.] VISUALIZACIÓN: Configurar y mostrar heatmap
 │   └── heatmap[7.] ANOTACIONES: Añadir valores numéricos a cada celda
 │
-└── [VIS-4] plot_hist_retornos(strategy_name)
-    ├── histograma[1.] PREPARACIÓN: Filtrar y convertir datos
-    ├── histograma[2.] CONFIGURACIÓN: Parámetros del histograma
-    ├── histograma[3.] COLORMAP: Crear mapa de colores unificado
-    ├── histograma[4.] VISUALIZACIÓN: Crear histograma con pesos
-    ├── histograma[5.] COLORACIÓN: Asignar colores según rendimiento
-    ├── histograma[6.] REFERENCIAS: Añadir líneas de referencia
-    └── histograma[7.] FORMATO: Configurar ejes y presentación
-"""
+├── [VIS-4] plot_hist_retornos(strategy_name)
+│   ├── histograma[1.] PREPARACIÓN: Filtrar y convertir datos
+│   ├── histograma[2.] CONFIGURACIÓN: Parámetros del histograma
+│   ├── histograma[3.] COLORMAP: Crear mapa de colores unificado
+│   ├── histograma[4.] VISUALIZACIÓN: Crear histograma con pesos
+│   ├── histograma[5.] COLORACIÓN: Asignar colores según rendimiento
+│   ├── histograma[6.] REFERENCIAS: Añadir líneas de referencia
+│   └── histograma[7.] FORMATO: Configurar ejes y presentación
+│
+├── [VIS-5] plot_drawdown(fechas_ord, valores_ord, strategy_name)
+│   ├── drawdown[1.] CÁLCULO: Calcular serie de drawdown
+│   ├── drawdown[2.] MÉTRICAS: Extraer máxima caída y duración
+│   ├── drawdown[3.] VISUALIZACIÓN: Graficar curva de drawdown
+│   └── drawdown[4.] CONFIGURACIÓN: Añadir título, etiquetas y grid
+│
+├── [VIS-6] plot_ruido_rentabilidades(fechas_ord, valores_ord, strategy_name, *, log=False)
+│   ├── ruido[1.] VALIDACIÓN: Comprobar datos suficientes
+│   ├── ruido[2.] PREPARACIÓN: Convertir a arrays numpy
+│   ├── ruido[3.] CÁLCULO: Calcular retornos según modo (log/simple)
+│   ├── ruido[4.] CONFIGURACIÓN: Definir parámetros según modo
+│   └── ruido[5.] VISUALIZACIÓN: Graficar serie de retornos
+│
+└── [VIS-7] plot_comparacion_acumulada_ultimos(fechas_ord, valores_ord, sp500_escalada, strategy_name, *, dias=30, log=False)
+    ├── acumulada[1.] VALIDACIÓN: Comprobar datos suficientes
+    ├── acumulada[2.] PREPARACIÓN: Extraer últimos N días de datos
+    ├── acumulada[3.] NORMALIZACIÓN: Establecer punto de inicio común
+    ├── acumulada[4.] CÁLCULO: Calcular retorno acumulado según modo
+    └── acumulada[5.] VISUALIZACIÓN: Graficar comparación estrategia vs S&P 500
 
+CARACTERÍSTICAS DEL SISTEMA:
+───────────────────────────
+• Total de gráficos generados: 11
+• Funciones de visualización: 7 principales
+• Cálculo incremental del ratio de Sharpe
+• Descarga automática de datos del S&P 500 (con yfinance)
+• Colormap unificado para consistencia visual
+• Análisis completo: rendimiento, riesgo, correlación, distribución
+"""
 class SharpeLog:
     """
     CALCULADORA INCREMENTAL DEL RATIO DE SHARPE LOGARÍTMICO
@@ -311,7 +348,7 @@ class EstrategiaValuacionConSP500:
     [INIT]   __init__()        : Inicializa estructura de datos y configuración
     [PARSE]  _parse_fecha()    : Convierte formatos de fecha a date estándar
     [ADD]    add()             : Añade datos de estrategia y calcula métricas
-    [PRINT]  print()           : Genera análisis visual completo (6 gráficos)
+    [PRINT]  print()           : Genera análisis visual completo (11 gráficos)
     
     Descripción:
     ------------
@@ -324,7 +361,7 @@ class EstrategiaValuacionConSP500:
     2. Cálculo automático de retornos logarítmicos diarios
     3. Cálculo incremental del ratio de Sharpe
     4. Descarga automática de datos del S&P 500
-    5. Generación de 6 gráficos comparativos profesionales
+    5. Generación de 11 gráficos comparativos profesionales
     
     Atributos principales:
     ----------------------
@@ -348,7 +385,7 @@ class EstrategiaValuacionConSP500:
     estrategia = EstrategiaValuacionConSP500()
     estrategia.add('2023-01-03', 100.0)
     estrategia.add('2023-01-04', 102.5)
-    estrategia.print('Mi Estrategia')  # Genera 6 gráficos de análisis
+    estrategia.print('Mi Estrategia')  # Genera 11 gráficos de análisis
     """
     
     def __init__(self, sp500_ticker='^GSPC', lookback_days=7):
@@ -1261,62 +1298,197 @@ class EstrategiaValuacionConSP500:
         plt.show()
 
     def plot_drawdown(self, fechas_ord, valores_ord, strategy_name):
-
+        """
+        CURVA DE DRAWDOWN: Visualización de caídas máximas desde picos históricos
+        
+        ÍNDICE DE LA FUNCIÓN:
+        drawdown[1.] CÁLCULO: Calcular serie de drawdown
+        drawdown[2.] MÉTRICAS: Extraer máxima caída y duración
+        drawdown[3.] VISUALIZACIÓN: Graficar curva de drawdown
+        drawdown[4.] CONFIGURACIÓN: Añadir título, etiquetas y grid
+        
+        Descripción:
+        ------------
+        Genera una curva que muestra el drawdown (caída porcentual) desde
+        el máximo histórico en cada punto del tiempo. El drawdown se define
+        como la pérdida porcentual desde el pico más alto anterior.
+        
+        Métricas calculadas:
+        1. Drawdown máximo: Mayor caída porcentual registrada
+        2. Duración máxima: Mayor número consecutivo de días bajo agua
+        
+        Parámetros:
+        -----------
+        fechas_ord : list
+            Fechas ordenadas cronológicamente
+        valores_ord : list
+            Valores de la estrategia correspondientes a cada fecha
+        strategy_name : str
+            Nombre de la estrategia para el título del gráfico
+            
+        Retorna:
+        --------
+        None: Muestra la curva de drawdown directamente con plt.show()
+        
+        Uso en el flujo principal:
+        --------------------------
+        Esta función es llamada desde print()[10.9] como el noveno gráfico
+        del análisis completo, mostrando el riesgo de caída de la estrategia.
+        """
+        # ====================================================================
+        # drawdown[1.] CÁLCULO: Calcular serie de drawdown
+        # ====================================================================
+        # Convierte valores a array numpy para operaciones vectorizadas
         v = np.array(valores_ord, dtype=float)
+        
+        # Calcula el pico máximo histórico acumulado (máximo hasta cada fecha)
         peak = np.maximum.accumulate(v)
-        dd = v / peak - 1.0  # <= 0
+        
+        # Calcula drawdown como porcentaje negativo: V_t / Peak_t - 1
+        dd = v / peak - 1.0  # Valores <= 0 (negativos o cero)
 
-        # max drawdown
-        max_dd = float(dd.min())  # negativo
-
-        # duración máxima (días) desde pico hasta recuperación
-        underwater = dd < 0
-        max_dur = 0
-        cur = 0
+        # ====================================================================
+        # drawdown[2.] MÉTRICAS: Extraer máxima caída y duración
+        # ====================================================================
+        # Drawdown máximo: valor más negativo (mayor caída en valor absoluto)
+        max_dd = float(dd.min())  # Valor negativo que representa la máxima caída
+        
+        # Calcula duración máxima del drawdown (días consecutivos bajo agua)
+        underwater = dd < 0  # Boolean array: True cuando hay drawdown
+        max_dur = 0  # Duración máxima inicializada
+        cur = 0      # Duración actual en progreso
+        
+        # Itera para encontrar la secuencia más larga de True consecutivos
         for u in underwater:
             if u:
                 cur += 1
                 if cur > max_dur:
                     max_dur = cur
             else:
-                cur = 0
+                cur = 0  # Reset cuando no hay drawdown
 
+        # ====================================================================
+        # drawdown[3.] VISUALIZACIÓN: Graficar curva de drawdown
+        # ====================================================================
         plt.figure()
+        
+        # Grafica drawdown convertido a porcentaje (multiplicando por 100)
         plt.plot(fechas_ord, dd * 100.0)
+        
+        # Línea de referencia en 0% (nivel del pico)
         plt.axhline(0)
-        plt.title(f"Drawdown - Estrategia {strategy_name}\nMaxDD: {max_dd*100:.2f}% | Duración máx: {max_dur} días")
+
+        # ====================================================================
+        # drawdown[4.] CONFIGURACIÓN: Añadir título, etiquetas y grid
+        # ====================================================================
+        # Título con métricas clave: máxima caída y duración
+        plt.title(f"Drawdown - Estrategia {strategy_name}\n"
+                  f"MaxDD: {max_dd*100:.2f}% | Duración máx: {max_dur} días")
+        
         plt.ylabel("Drawdown (%)")
         plt.xlabel("Fecha")
         plt.grid(True)
         plt.show()
 
     def plot_ruido_rentabilidades(self, fechas_ord, valores_ord, strategy_name, *, log=False):
-        v = np.array(valores_ord, dtype=float)
-        f = np.array(fechas_ord)
-
-        if len(v) < 2:
+        """
+        GRÁFICO DE RUIDO/VOLATILIDAD: Visualización de variabilidad diaria
+        
+        ÍNDICE DE LA FUNCIÓN:
+        ruido[1.] VALIDACIÓN: Comprobar datos suficientes
+        ruido[2.] PREPARACIÓN: Convertir a arrays numpy
+        ruido[3.] CÁLCULO: Calcular retornos según modo (log/simple)
+        ruido[4.] CONFIGURACIÓN: Definir parámetros según modo
+        ruido[5.] VISUALIZACIÓN: Graficar serie de retornos
+        
+        Descripción:
+        ------------
+        Muestra la serie temporal de retornos diarios, permitiendo visualizar
+        la "ruido" o volatilidad de la estrategia. Un gráfico con poca
+        variación indica estabilidad, mientras que mucha variación indica
+        alta volatilidad.
+        
+        Dos modos disponibles:
+        - Modo simple: Retorno diario = (P_t / P_{t-1}) - 1
+        - Modo logarítmico: Retorno diario = ln(P_t / P_{t-1})
+        
+        Parámetros:
+        -----------
+        fechas_ord : list
+            Fechas ordenadas cronológicamente
+        valores_ord : list
+            Valores de la estrategia correspondientes a cada fecha
+        strategy_name : str
+            Nombre de la estrategia para el título del gráfico
+        log : bool, optional
+            Si True, usa retornos logarítmicos (por defecto False)
+            
+        Retorna:
+        --------
+        None: Muestra el gráfico de ruido directamente con plt.show()
+        
+        Uso en el flujo principal:
+        --------------------------
+        Esta función es llamada dos veces desde print():
+        1. print[10.10] con log=False (ruido en retornos simples)
+        2. print[10.11] con log=True (ruido en retornos logarítmicos)
+        """
+        # ====================================================================
+        # ruido[1.] VALIDACIÓN: Comprobar datos suficientes
+        # ====================================================================
+        # Se necesitan al menos 2 valores para calcular retornos
+        if len(valores_ord) < 2:
             print("No hay datos suficientes para graficar rentabilidades.")
             return
 
-        # Retornos: simple o log
-        prev = v[:-1]
-        cur = v[1:]
+        # ====================================================================
+        # ruido[2.] PREPARACIÓN: Convertir a arrays numpy
+        # ====================================================================
+        # Convierte valores y fechas a arrays numpy para operaciones vectorizadas
+        v = np.array(valores_ord, dtype=float)
+        f = np.array(fechas_ord)
+
+        # ====================================================================
+        # ruido[3.] CÁLCULO: Calcular retornos según modo (log/simple)
+        # ====================================================================
+        # Separa valores anteriores (t-1) y actuales (t)
+        prev = v[:-1]  # Todos excepto el último
+        cur = v[1:]    # Todos excepto el primero
 
         if log:
+            # RETORNOS LOGARÍTMICOS: ln(P_t / P_{t-1})
+            # Inicializa array con NaN para manejar divisiones inválidas
             r = np.full(len(cur), np.nan, dtype=float)
+            
+            # Identifica pares válidos (ambos valores > 0)
             ok = (prev > 0) & (cur > 0)
+            
+            # Calcula logaritmo solo para pares válidos
             r[ok] = np.log(cur[ok] / prev[ok])
+            
             titulo = f"Gráfico de ruido de rentabilidades (log) - {strategy_name}"
             ylabel = "Rentabilidad log diaria (%)"
         else:
+            # RETORNOS SIMPLES: (P_t / P_{t-1}) - 1
             r = (cur / prev) - 1.0
-            titulo = f"Gráfico de ruido de rentabilidades - {strategy_name}"
+            
+            titulo = f"Gráfico de ruido de rentabilidades - Estrategia {strategy_name}"
             ylabel = "Rentabilidad diaria (%)"
 
+        # Fechas correspondientes a los retornos (excluye primera fecha)
         fechas = f[1:]
 
+        # ====================================================================
+        # ruido[4.] VISUALIZACIÓN: Graficar serie de retornos
+        # ====================================================================
         plt.figure()
-        plt.plot(fechas, r * 100.0)  # conectando puntos
+        
+        # Grafica retornos convertidos a porcentaje
+        plt.plot(fechas, r * 100.0)
+        
+        # ====================================================================
+        # ruido[5.] CONFIGURACIÓN: Definir título y etiquetas
+        # ====================================================================
         plt.title(titulo)
         plt.xlabel("Fecha")
         plt.ylabel(ylabel)
@@ -1324,41 +1496,109 @@ class EstrategiaValuacionConSP500:
         plt.show()
 
     def plot_comparacion_acumulada_ultimos(self, fechas_ord, valores_ord, sp500_escalada, strategy_name, *, dias=30, log=False):
-
+        """
+        COMPARACIÓN ACUMULADA RECIENTE: Rendimiento de los últimos N días
+        
+        ÍNDICE DE LA FUNCIÓN:
+        acumulada[1.] VALIDACIÓN: Comprobar datos suficientes
+        acumulada[2.] PREPARACIÓN: Extraer últimos N días de datos
+        acumulada[3.] NORMALIZACIÓN: Establecer punto de inicio común
+        acumulada[4.] CÁLCULO: Calcular retorno acumulado según modo
+        acumulada[5.] VISUALIZACIÓN: Graficar comparación estrategia vs S&P 500
+        
+        Descripción:
+        ------------
+        Compara el rendimiento acumulado de la estrategia vs el S&P 500
+        en un periodo reciente (por defecto últimos 30 días). Ambos series
+        comienzan en 0% y muestran su evolución relativa.
+        
+        Dos modos disponibles:
+        - Modo simple: Retorno acumulado = (V_t / V_0) - 1
+        - Modo logarítmico: Retorno acumulado = ln(V_t / V_0)
+        
+        Parámetros:
+        -----------
+        fechas_ord : list
+            Fechas ordenadas cronológicamente
+        valores_ord : list
+            Valores de la estrategia correspondientes a cada fecha
+        sp500_escalada : list
+            Valores del S&P 500 escalados para comparación
+        strategy_name : str
+            Nombre de la estrategia para la leyenda
+        dias : int, optional
+            Número de días a considerar (por defecto 30)
+        log : bool, optional
+            Si True, usa retornos logarítmicos acumulados (por defecto False)
+            
+        Retorna:
+        --------
+        None: Muestra el gráfico de comparación directamente con plt.show()
+        
+        Uso en el flujo principal:
+        --------------------------
+        Esta función es llamada dos veces desde print():
+        1. print[10.3] con log=False (comparación simple últimos 30 días)
+        2. print[10.4] con log=True (comparación logarítmica últimos 30 días)
+        """
+        # ====================================================================
+        # acumulada[1.] VALIDACIÓN: Comprobar datos suficientes
+        # ====================================================================
+        # Usa el mínimo entre días solicitados y días disponibles
         n = min(dias, len(valores_ord))
+        
+        # Se necesitan al menos 2 valores para la comparación
         if n < 2:
             print("No hay datos suficientes para la comparación acumulada.")
             return
 
-        f = fechas_ord[-n:]
-        s = np.array(valores_ord[-n:], dtype=float)
-        b = np.array(sp500_escalada[-n:], dtype=float)
+        # ====================================================================
+        # acumulada[2.] PREPARACIÓN: Extraer últimos N días de datos
+        # ====================================================================
+        # Extrae los últimos n elementos de cada lista
+        f = fechas_ord[-n:]  # Fechas de los últimos n días
+        s = np.array(valores_ord[-n:], dtype=float)  # Estrategia
+        b = np.array(sp500_escalada[-n:], dtype=float)  # S&P 500
 
+        # ====================================================================
+        # acumulada[3.] NORMALIZACIÓN: Establecer punto de inicio común
+        # ====================================================================
+        # Valores iniciales para normalizar ambas series a partir de 0%
         s0, b0 = s[0], b[0]
+        
+        # Validación: valores iniciales deben ser positivos
         if s0 <= 0 or b0 <= 0:
             print("Valores iniciales inválidos para normalizar.")
             return
 
+        # ====================================================================
+        # acumulada[4.] CÁLCULO: Calcular retorno acumulado según modo
+        # ====================================================================
         if log:
-            # acumulado log: ln(Vt/V0)
+            # RETORNO LOGARÍTMICO ACUMULADO: ln(V_t / V_0) × 100
             s_ret = np.log(s / s0) * 100.0
             b_ret = np.log(b / b0) * 100.0
             titulo = f"Comparación de referencia acumulada (log) - últimos {n} días"
             ylabel = "Retorno acumulado log (%)"
         else:
-            # acumulado simple: (Vt/V0 - 1)
+            # RETORNO SIMPLE ACUMULADO: (V_t / V_0 - 1) × 100
             s_ret = (s / s0 - 1.0) * 100.0
             b_ret = (b / b0 - 1.0) * 100.0
             titulo = f"Comparación de referencia acumulada (simple) - últimos {n} días"
             ylabel = "Retorno acumulado (%)"
 
+        # ====================================================================
+        # acumulada[5.] VISUALIZACIÓN: Graficar comparación estrategia vs S&P 500
+        # ====================================================================
         plt.figure()
+        
+        # Grafica ambas series con leyenda diferenciada
         plt.plot(f, s_ret, label=strategy_name)
         plt.plot(f, b_ret, label="S&P 500")
+        
         plt.title(titulo)
         plt.xlabel("Fecha")
         plt.ylabel(ylabel)
         plt.grid(True)
-        plt.legend()
+        plt.legend()  # Muestra leyenda con ambas series
         plt.show()
-
