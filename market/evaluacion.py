@@ -1466,7 +1466,7 @@ class EstrategiaValuacionConSP500:
             # Calcula logaritmo solo para pares válidos
             r[ok] = np.log(cur[ok] / prev[ok])
             
-            titulo = f"Gráfico de ruido de rentabilidades (log) - {strategy_name}"
+            titulo = f"Gráfico de ruido de rentabilidades (log) - Estrategia {strategy_name}"
             ylabel = "Rentabilidad log diaria (%)"
         else:
             # RETORNOS SIMPLES: (P_t / P_{t-1}) - 1
