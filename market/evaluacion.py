@@ -948,50 +948,36 @@ class EstrategiaValuacionConSP500:
         plt.show()
         print()
 
-    def plot_heatmap_mensual_anual(self, fechas, returns, strategy_name, *, log=False): #[VIS-3]
+    def plot_heatmap_mensual_anual(self, fechas, returns, strategy_name, *, log=False):  # [VIS-3]
         """
         HEATMAP MENSUAL/ANUAL: Visualización matricial de rentabilidades
-        
+
         ÍNDICE DE LA FUNCIÓN:
         heatmap[1.] PREPARACIÓN: Filtrar y estructurar datos
         heatmap[2.] AGRUPACIÓN: Calcular rentabilidades mensuales
         heatmap[3.] CONFIGURACIÓN: Definir parámetros según modo (log/simple)
-        heatmap[4.] COLORMAP: Crear mapa de colores unificado
-        heatmap[5.] ESTRUCTURA: Crear tabla pivot y matriz de datos
+        heatmap[4.] ESTRUCTURA: Crear tabla pivot y matriz de datos
+        heatmap[5.] ESCALA: Calcular vmin/vmax simétricos por |max|
         heatmap[6.] VISUALIZACIÓN: Configurar y mostrar heatmap
         heatmap[7.] ANOTACIONES: Añadir valores numéricos a cada celda
-        
+
         Descripción:
         ------------
         Genera un heatmap (mapa de calor) que muestra las rentabilidades
         mensuales organizadas por año (filas) y mes (columnas).
-        
+
         Dos modos de cálculo:
         - Modo simple (log=False): Retorno mensual simple = exp(Σr_log) - 1
         - Modo logarítmico (log=True): Retorno mensual log = Σr_log
-        
-        Parámetros:
-        -----------
-        fechas : list
-            Lista de fechas correspondientes a cada retorno
-        returns : list
-            Retornos logarítmicos diarios de la estrategia
-        strategy_name : str
-            Nombre de la estrategia para el título del gráfico
-        log : bool, optional
-            Modo de cálculo (False=simple, True=logarítmico), por defecto False
-            
-        Retorna:
-        --------
-        None: Muestra el heatmap directamente con plt.show()
-        
-        Uso en el flujo principal:
-        --------------------------
-        Esta función es llamada dos veces desde print():
-        1. print[10.4] con log=False (heatmap de rentabilidades simples)
-        2. print[10.5] con log=True (heatmap de rentabilidades logarítmicas)
+
+        Nota sobre la escala de color:
+        ------------------------------
+        Para que el color sea comparable dentro de cada heatmap, se usa una escala
+        simétrica: vmin = -maxabs y vmax = +maxabs, donde maxabs = max(|min|,|max|)
+        de los valores mensuales del heatmap. Ej:
+        min=-0.42, max=0.34 -> maxabs=0.42 -> rango [-0.42, +0.42]
         """
-        
+
         # ====================================================================
         # heatmap[1.] PREPARACIÓN: Filtrar y estructurar datos
         # ====================================================================
@@ -1001,7 +987,7 @@ class EstrategiaValuacionConSP500:
             for f, r in zip(fechas, returns)
             if r is not None
         ]
-        
+
         # Validación: verificar que hay datos suficientes
         if not datos:
             print("No hay retornos suficientes para el heatmap mensual/anual.")
@@ -1009,7 +995,7 @@ class EstrategiaValuacionConSP500:
 
         # Crear DataFrame con columnas de fecha y retorno logarítmico
         df = pd.DataFrame(datos, columns=["date", "r_log"])
-        
+
         # Extraer año y mes para agrupación posterior
         df["year"] = df["date"].dt.year
         df["month"] = df["date"].dt.month
@@ -1028,28 +1014,20 @@ class EstrategiaValuacionConSP500:
             grouped["ret"] = grouped["r_log"]
             cbar_label = "Rentabilidad mensual (log)"
             title_extra = " (log)"
-            vmin, vmax = -0.2, 0.2  # Rango típico para retornos log mensuales
             fmt = "{:.1f}%"
         else:
             # MODO SIMPLE: convierte retorno log a retorno simple
             grouped["ret"] = np.exp(grouped["r_log"]) - 1.0
             cbar_label = "Rentabilidad mensual"
             title_extra = ""
-            vmin, vmax = -0.5, 0.5  # Rango típico para retornos simples (-50% a +50%)
             fmt = "{:.1f}%"
 
         # ====================================================================
-        # heatmap[4.] COLORMAP: Crear mapa de colores unificado
-        # ====================================================================
-        # Obtiene el colormap configurado con los rangos definidos
-        cmap = self._get_unified_colormap(vmin=vmin, vmax=vmax)
-
-        # ====================================================================
-        # heatmap[5.] ESTRUCTURA: Crear tabla pivot y matriz de datos
+        # heatmap[4.] ESTRUCTURA: Crear tabla pivot y matriz de datos
         # ====================================================================
         # Crea tabla pivot con años en filas y meses en columnas
         pivot = grouped.pivot(index="year", columns="month", values="ret").sort_index()
-        
+
         # Asegura que haya columnas para todos los meses (1-12)
         pivot = pivot.reindex(columns=list(range(1, 13)))
 
@@ -1058,19 +1036,37 @@ class EstrategiaValuacionConSP500:
             print("No se pudo construir el heatmap de rentabilidades mensuales.")
             return
 
+        # ====================================================================
+        # heatmap[5.] ESCALA: Calcular vmin/vmax simétricos por |max|
+        # ====================================================================
+        # Calcula min/max ignorando NaN y fuerza escala simétrica por valor absoluto mayor
+        vals = pivot.to_numpy(dtype=float)  # contiene NaN
+        mn = np.nanmin(vals)
+        mx = np.nanmax(vals)
+
+        if not np.isfinite(mn) or not np.isfinite(mx):
+            print("No hay valores válidos para calcular la escala del heatmap.")
+            return
+
+        maxabs = max(abs(mn), abs(mx))
+        if maxabs == 0:
+            maxabs = 1e-9  # evita escala degenerada
+
+        vmin, vmax = -maxabs, maxabs
+
         # Prepara máscara para identificar celdas vacías (sin datos)
         mask_nan = pivot.isna()
-        
+
         # Rellena valores NaN con 0 para la visualización
         pivot_filled = pivot.fillna(0.0)
-        
+
         # Convierte a matriz numpy para la visualización
         data_matrix = pivot_filled.values
 
         # Prepara listas de años y meses para etiquetas
         years = list(pivot.index)
         months = list(pivot.columns)
-        
+
         # Etiquetas cortas en español para los meses
         month_labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
                         'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
@@ -1080,33 +1076,36 @@ class EstrategiaValuacionConSP500:
         # ====================================================================
         plt.figure()
 
-        # Crea la visualización del heatmap
+        # Crea el colormap usando tu helper (si lo tienes)
+        cmap = self._get_unified_colormap(vmin=vmin, vmax=vmax)
+
+        # Dibuja el heatmap
         im = plt.imshow(
             data_matrix,
-            aspect="auto",          # Ajusta aspecto automáticamente
-            interpolation="nearest", # Sin interpolación para mantener bordes definidos
-            cmap=cmap,              # Mapa de colores personalizado
-            origin="lower",         # Origen en esquina inferior izquierda
-            vmin=vmin,              # Valor mínimo para escala de colores
-            vmax=vmax,              # Valor máximo para escala de colores
+            aspect="auto",            # Ajusta aspecto automáticamente
+            interpolation="nearest",  # Sin interpolación para mantener bordes definidos
+            cmap=cmap,                # Mapa de colores
+            origin="lower",           # Origen en esquina inferior izquierda
+            vmin=vmin,                # Valor mínimo para escala de colores
+            vmax=vmax,                # Valor máximo para escala de colores
         )
-        
-        # Añade barra de colores con etiqueta descriptiva
+
+        # Barra de colores con etiqueta descriptiva
         plt.colorbar(im, label=cbar_label)
 
-        # Configura etiquetas del eje X (meses)
+        # Etiquetas del eje X (meses)
         plt.xticks(
             ticks=range(len(months)),
             labels=[month_labels[m - 1] for m in months],
             rotation=0,
         )
-        
-        # Configura etiquetas del eje Y (años)
+
+        # Etiquetas del eje Y (años)
         plt.yticks(
             ticks=range(len(years)),
             labels=years,
         )
-        
+
         # Etiquetas de ejes
         plt.xlabel("Mes")
         plt.ylabel("Año")
@@ -1120,25 +1119,26 @@ class EstrategiaValuacionConSP500:
                 # Salta celdas sin datos originales
                 if mask_nan.iloc[i, j]:
                     continue
-                    
+
                 # Obtiene valor de la celda
                 val = data_matrix[i, j]
-                
+
                 # Formatea como porcentaje
                 txt = fmt.format(val * 100.0)
-                
+
                 # Añade texto centrado en la celda
                 plt.text(
                     j, i, txt,
-                    ha="center",     # Alineación horizontal centrada
-                    va="center",     # Alineación vertical centrada
-                    fontsize=8,      # Tamaño de fuente pequeño pero legible
-                    color="black",   # Color de texto contrastante
+                    ha="center",
+                    va="center",
+                    fontsize=8,
+                    color="black",
                 )
 
         # Ajusta layout y muestra el gráfico
         plt.tight_layout()
         plt.show()
+
 
     def plot_hist_retornos(self, strategy_name): #[VIS-4]
         """
@@ -1387,6 +1387,7 @@ class EstrategiaValuacionConSP500:
         
         plt.ylabel("Drawdown (%)")
         plt.xlabel("Fecha")
+        plt.ylim(-100, 0)   # <- rango [-100% al 0%]
         plt.grid(True)
         plt.show()
 
