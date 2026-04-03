@@ -25,6 +25,9 @@ from strategyClient import StrategyClient as Strategy
 
 from order_notifier import send_email, send_discord, send_telegram
 
+import pandas_market_calendars as mcal
+from datetime import datetime
+
 def make_hash(func_name, args, kwargs):
     """Crea un hash único para la función y sus argumentos."""
     data = (func_name, tuple(sorted(kwargs.items())))
@@ -631,7 +634,17 @@ class PyRoboAdvisor:
             d.completeTicketsWithIB(self.tickers)
             self.d=d
         
+    def _esta_cerrado_hoy(self):
+        nyse = mcal.get_calendar('NYSE')
+        today = datetime.now().date()
+        schedule = nyse.schedule(start_date=today, end_date=today)
+        return schedule.empty
+
     def autoIB(self):
+        if self._esta_cerrado_hoy():
+            print("Advertencia: Hoy el mercado está cerrado. No se ejecutarán órdenes")
+            return
+        
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
             self.d=Driver(self.p["puerto"])

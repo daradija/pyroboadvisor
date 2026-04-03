@@ -8,3 +8,4 @@ lxml
 fastapi
 pydantic
 ib_insync
+pandas-market-calendars
