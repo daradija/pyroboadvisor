@@ -54,6 +54,7 @@ class Source:
 
     name="Yahoo Finance"
 
+
     def __init__(self, p,cache, lista_instrumentos, fecha_inicio, fecha_fin, intervalo):
         self.cache=cache
         self.lista_instrumentos = lista_instrumentos
@@ -165,36 +166,89 @@ class Source:
             print("⚠️ No hay datos para limpiar.")
             return None
 
-    def realTime(self,symbols):
+    # Para los tickers que mueren
+    YF_ALIASES = {
+        "FISV": "FI",   # renombre / ticker muerto
+        # añade aquí los que vayas detectando
+    }
+
+    def _resolve_yf_symbol(self, symbol: str):
+        # caché para no re-probar siempre
+        if not hasattr(self, "_yf_resolve_cache"):
+            self._yf_resolve_cache = {}
+
+        symbol = symbol.strip().upper()
+        if symbol in self._yf_resolve_cache:
+            return self._yf_resolve_cache[symbol]
+
+        # candidatos: alias + normalizaciones típicas (BRK.B -> BRK-B, etc.)
+        candidates = []
+        if symbol in self.YF_ALIASES:
+            candidates.append(self.YF_ALIASES[symbol])
+        candidates += [
+            symbol,
+            symbol.replace(".", "-"),
+            symbol.replace("-", "."),
+        ]
+
+        def ok(sym):
+            try:
+                t = yf.Ticker(sym)
+                # comprobación barata: si no hay nada reciente, probablemente no existe
+                h = t.history(period="5d", interval="1d", prepost=True)
+                return not h.empty
+            except Exception:
+                return False
+
+        resolved = None
+        for c in dict.fromkeys(candidates):  # quita duplicados preservando orden
+            if ok(c):
+                resolved = c
+                break
+
+        self._yf_resolve_cache[symbol] = resolved
+        return resolved    
+
+    def realTime(self, symbols):
         """
         Obtiene el precio casi “en vivo” de los instrumentos especificados.
+        Devuelve una lista de precios en el mismo orden que `symbols`.
         """
-        resultados = []  # para devolver un dict {símbolo: precio}
+        resultados = []
         for symbol in symbols:
             try:
-                try:
-                    ticker = yf.Ticker(symbol)
-                except Exception as e:
-                    if symbol=="FISV":
-                        ticker = yf.Ticker("FI")
-                    else:
-                        raise e
-                # regularMarketPrice = último precio en la sesión regular
+                orig = symbol
+                symbol = symbol.strip().upper()
+
+                sym_yf = self._resolve_yf_symbol(symbol)
+
+                if sym_yf is None:
+                    resultados.append(0)
+                    print(f"⚠️ No se obtuvo precio para {orig}")
+                    continue
+
+                # mensaje si ha habido “traducción” del ticker
+                if sym_yf != symbol:
+                    print(f"↪️ {orig} resuelto como {sym_yf} en Yahoo")
+
+                ticker = yf.Ticker(sym_yf)
+
                 precio = ticker.info.get("regularMarketPrice", None)
                 if precio is None:
-                    # fallback: usar la última vela (por si ticker.info falla)
                     hist = ticker.history(period="1d", interval=self.intervalo, prepost=True)
                     if not hist.empty:
                         precio = hist["Close"].iloc[-1]
+
                 if precio is not None:
                     resultados.append(precio)
-                    print(f"📈 {symbol} - Current price: {precio}")
+                    print(f"📈 {orig} - Current price: {precio}")
                 else:
                     resultados.append(0)
-                    print(f"⚠️ No se obtuvo precio para {symbol}")
+                    print(f"⚠️ No se obtuvo precio para {orig}")
+
             except Exception as e:
-                print(f"❌ Error para {symbol}: {e}")
-                resultados[symbol] = None
+                print(f"❌ Error para {orig}: {e}")
+                resultados.append(0)
 
         return resultados
 
