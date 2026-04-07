@@ -740,6 +740,58 @@ class PyRoboAdvisor:
             print("Tipo de operatoria no válido. Debe ser 0, 1, 2 o 3.")
             return
 
+    def notifyOrder(self, orders, autoIB = False):
+        email_body = "Ordenes a ejecutar:\n\nComprar:\n"
+        print("\nComprar:")
+        for order in orders["programBuy"]:
+            # redondea cantidad a entero y precio a 2 decimales
+            precio = round(order["price"], 2)
+            cantidad = int(round(order["amount"] / precio))
+            linea = (
+                f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            )
+            print(linea)
+            email_body += linea + "\n"
+            if autoIB:
+                self.d.buy_limit(self.sp.symbols[order['id']], cantidad, precio)
+
+        print("\nVender:")
+        email_body += "\nVender:\n"
+        for order in orders["programSell"]:
+            
+            precio = round(order["price"], 2)
+            cantidad = int(round(order["amount"] / precio))
+            linea = f"{cantidad} acciones de {self.sp.symbols[order['id']]} a {precio:.2f}"
+            print(linea)
+            email_body += linea + "\n"
+            if autoIB:
+                self.d.sell_limit(self.sp.symbols[order["id"]], cantidad, precio)
+
+        if (
+            self.p.get("email_remitente")
+            and self.p.get("email_remitente")
+            and self.p.get("email_remitente")
+        ):
+            send_email(
+                sender=self.p.get("email_remitente", ""),
+                recipients=self.p.get(
+                    "email_destino", self.p.get("email_remitente", "")
+                ),
+                subject="Órdenes de Compra y Venta",
+                body=email_body,
+                email_app_password=self.p.get("email_app_password", ""),
+            )
+
+        if self.p.get("telegram_apikey") and self.p.get("telegram_channelid"):
+            send_telegram(
+                bot_token=self.p.get("telegram_apikey"),
+                chat_ids=self.p.get("telegram_channelid"),
+                message=email_body,
+            )
+
+        if self.p.get("discord_webhook"):
+            send_discord(webhook_url=self.p.get("discord_webhook"), message=email_body)
+
 # pra.manual(3000,{ # Para operar manualmente debes indicar los dolares y las posiciones de cartera
 #     "AAPL": 20,
 #     "MSFT": 20,
