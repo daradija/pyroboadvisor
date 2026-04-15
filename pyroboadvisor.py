@@ -1,4 +1,4 @@
-from market.source import Source
+from market.source import Source, create_source
 # from market.sourceEODHD import Source as SourceEODHD
 from market.sourcePerDay import SourcePerDay
 import numpy as np
@@ -109,7 +109,7 @@ class PyRoboAdvisor:
         self.cache = os.path.join(tempfile.gettempdir(), "pyroboadvisor")
         os.makedirs(self.cache, exist_ok=True)
 
-        sourceSource=[Source]#,SourceEODHD]#,SourcePolygon]
+        sourceSource=[create_source("yahoo")]  # Returns [SourceYahoo]
 
         # si no tiene usuario ni contraseña los pregunta y mete en config.json y p
         # Lee config.json si existe

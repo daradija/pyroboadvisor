@@ -1,45 +1,11 @@
-import yfinance as yf
+from abc import ABC, abstractmethod
 import pandas as pd
-from datetime import datetime, timedelta
-import numpy as np
+from datetime import datetime
 
-import os
-import pickle
-import hashlib
-import functools
 
-def make_hash(func_name, args, kwargs):
-    """Crea un hash único para la función y sus argumentos."""
-    data = (func_name, tuple(sorted(kwargs.items())))
-    data_bytes = pickle.dumps(data)
-    return hashlib.md5(data_bytes).hexdigest()
-
-def disk_cache(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # Crear la carpeta de cache si no existe
-        
-        cache_dir=args[0].cache
-        os.makedirs(cache_dir, exist_ok=True)
-        
-        # Crear el hash y el nombre del archivo
-        key = make_hash(func.__name__, args, kwargs)
-        cache_file = os.path.join(cache_dir, f"{key}.pkl")
-        
-        # Si el archivo ya existe, cargar el resultado
-        if os.path.exists(cache_file):
-            with open(cache_file, "rb") as f:
-                return pickle.load(f)
-        
-        # Si no, llamar a la función y guardar el resultado
-        result = func(*args, **kwargs)
-        with open(cache_file, "wb") as f:
-            pickle.dump(result, f)
-        return result
-
-    return wrapper
-
-class Source:
+class Source(ABC):
+    """Clase abstracta para fuentes de datos de mercado"""
+    
     LIMITES_INTERVALO = {
         "1m": 730,
         "2m": 730,
@@ -52,212 +18,65 @@ class Source:
         "1mo": None,
     }
 
-    name="Yahoo Finance"
+    name = "Source"
 
-
-    def __init__(self, p,cache, lista_instrumentos, fecha_inicio, fecha_fin, intervalo):
-        self.cache=cache
-        self.lista_instrumentos = lista_instrumentos
-        self.fecha_inicio = fecha_inicio
-        self.fecha_fin = fecha_fin
-        self.intervalo = intervalo
-        self.datos_por_instrumento = {}
-
-        gestor = self
-        gestor.descargar_datos()
-        datos_limpiados = gestor.limpiar_datos()
-        # saca las claves en self.symbols
-        self.symbols = list(datos_limpiados.keys())
-        self.size= len(self.symbols)
-
-        self.dates=[]
-        self.open=[]
-        self.close=[]
-        self.high=[]
-        self.low=[]
-        for symbol in self.symbols:
-            df = datos_limpiados[symbol]
-            self.dates.append(df['Date'].tolist())
-            self.open.append(df['Open'].tolist())
-            self.close.append(df['Close'].tolist())
-            self.high.append(df['High'].tolist())
-            self.low.append(df['Low'].tolist())
-        self.dates = self.dates
-        self.open = self.open
-        self.close = self.close
-        self.high = self.high
-        self.low = self.low
+    @abstractmethod
+    def __init__(self, p, cache, lista_instrumentos, fecha_inicio, fecha_fin, intervalo):
+        """
+        Inicializa la fuente de datos con los parámetros necesarios para descargar y procesar los datos de mercado.
         
+        Args:
+            p: Parametros de configuración
+            cache: Directorio para almacenar datos en caché
+            lista_instrumentos: Lista de instrumentos financieros a descargar (e.g., ["AAPL", "GOOG"])
+            fecha_inicio: Fecha de inicio en formato "YYYY-MM-DD"
+            fecha_fin: Fecha de fin en formato "YYYY-MM-DD"
+            intervalo: Intervalo de tiempo para los datos (ver LIMITES_INTERVALO)
+        """
+        pass
 
-
-    def dividir_rango_fechas(self, inicio, fin, max_dias):
-        bloques = []
-        inicio_dt = datetime.strptime(inicio, "%Y-%m-%d")
-        fin_dt = datetime.strptime(fin, "%Y-%m-%d")
-        while inicio_dt < fin_dt:
-            bloque_fin_dt = min(inicio_dt + timedelta(days=max_dias), fin_dt)
-            bloques.append((inicio_dt.strftime("%Y-%m-%d"), bloque_fin_dt.strftime("%Y-%m-%d")))
-            inicio_dt = bloque_fin_dt + timedelta(days=1)
-        return bloques
-
-    @disk_cache
-    def get_datos(self,instrumento=None,start=None,end=None,interval=None,progress=False):
-        return yf.download(
-            instrumento,
-            start=start,
-            end=end,
-            interval=interval,
-            progress=progress
-        )
+    @abstractmethod
     def descargar_datos(self):
-        try:
-            limite = self.LIMITES_INTERVALO.get(self.intervalo)
-            if limite is not None:
-                bloques = self.dividir_rango_fechas(self.fecha_inicio, self.fecha_fin, limite)
-            else:
-                bloques = [(self.fecha_inicio, self.fecha_fin)]
-            
-            for instrumento in self.lista_instrumentos:
-                lista_dfs = []
-                for bloque in bloques:
-                    inicio_bloque, fin_bloque = bloque
-                    print(f"📥 Descargando {instrumento} desde {inicio_bloque} hasta {fin_bloque} con intervalo {self.intervalo}")
-                    df_bloque = self.get_datos(
-                        instrumento=instrumento,
-                        start=inicio_bloque,
-                        end=fin_bloque,
-                        interval=self.intervalo,
-                        progress=False
-                    )
-                    if not df_bloque.empty:
-                        df_bloque = self.aplanar_columnas(df_bloque)
-                        df_bloque.reset_index(inplace=True)
-                        lista_dfs.append(df_bloque)
-                
-                if lista_dfs:
-                    self.datos_por_instrumento[instrumento] = pd.concat(lista_dfs, ignore_index=True)
-                else:
-                    print(f"⚠️ No se han obtenido datos para {instrumento} en el rango especificado.")
-            
-            return self.datos_por_instrumento
-        except Exception as error:
-            print(f"❌ Error al descargar los datos: {error}")
-            return None
+        """Descarga los datos de mercado para los instrumentos y rango de fechas especificados."""
+        pass
 
-    def aplanar_columnas(self, df):
-        """
-        Asegura que el DataFrame no tenga MultiIndex en las columnas.
-        Si las columnas incluyen el nombre del activo (ej. 'Close AAPL'), se eliminan esas referencias.
-        """
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = [' '.join(col).strip() for col in df.columns.values]
-
-        df.columns = [col.split(' ')[0] if ' ' in col else col for col in df.columns]
-        return df
-
+    @abstractmethod
     def limpiar_datos(self):
-        if self.datos_por_instrumento:
-            for instrumento, df in self.datos_por_instrumento.items():
-                df.dropna(inplace=True)
-                df.drop_duplicates(inplace=True)
-                self.datos_por_instrumento[instrumento] = df
-            return self.datos_por_instrumento
-        else:
-            print("⚠️ No hay datos para limpiar.")
-            return None
+        """Limpia y valida los datos descargados."""
+        pass
 
-    # Para los tickers que mueren
-    YF_ALIASES = {
-        "FISV": "FI",   # renombre / ticker muerto
-        # añade aquí los que vayas detectando
-    }
-
-    def _resolve_yf_symbol(self, symbol: str):
-        # caché para no re-probar siempre
-        if not hasattr(self, "_yf_resolve_cache"):
-            self._yf_resolve_cache = {}
-
-        symbol = symbol.strip().upper()
-        if symbol in self._yf_resolve_cache:
-            return self._yf_resolve_cache[symbol]
-
-        # candidatos: alias + normalizaciones típicas (BRK.B -> BRK-B, etc.)
-        candidates = []
-        if symbol in self.YF_ALIASES:
-            candidates.append(self.YF_ALIASES[symbol])
-        candidates += [
-            symbol,
-            symbol.replace(".", "-"),
-            symbol.replace("-", "."),
-        ]
-
-        def ok(sym):
-            try:
-                t = yf.Ticker(sym)
-                # comprobación barata: si no hay nada reciente, probablemente no existe
-                h = t.history(period="5d", interval="1d", prepost=True)
-                return not h.empty
-            except Exception:
-                return False
-
-        resolved = None
-        for c in dict.fromkeys(candidates):  # quita duplicados preservando orden
-            if ok(c):
-                resolved = c
-                break
-
-        self._yf_resolve_cache[symbol] = resolved
-        return resolved    
-
+    @abstractmethod
     def realTime(self, symbols):
         """
-        Obtiene el precio casi “en vivo” de los instrumentos especificados.
-        Devuelve una lista de precios en el mismo orden que `symbols`.
+        Obtiene los precios en tiempo real para una lista de símbolos.
+        
+        Args:
+            symbols: Lista de símbolos para los cuales obtener precios (e.g., ["AAPL", "GOOG"])
+            
+        Returns:
+            Lista de precios correspondientes a los símbolos en el mismo orden. Si no se puede obtener el precio, se devuelve 0.
         """
-        resultados = []
-        for symbol in symbols:
-            try:
-                orig = symbol
-                symbol = symbol.strip().upper()
-
-                sym_yf = self._resolve_yf_symbol(symbol)
-
-                if sym_yf is None:
-                    resultados.append(0)
-                    print(f"⚠️ No se obtuvo precio para {orig}")
-                    continue
-
-                # mensaje si ha habido “traducción” del ticker
-                if sym_yf != symbol:
-                    print(f"↪️ {orig} resuelto como {sym_yf} en Yahoo")
-
-                ticker = yf.Ticker(sym_yf)
-
-                precio = ticker.info.get("regularMarketPrice", None)
-                if precio is None:
-                    hist = ticker.history(period="1d", interval=self.intervalo, prepost=True)
-                    if not hist.empty:
-                        precio = hist["Close"].iloc[-1]
-
-                if precio is not None:
-                    resultados.append(precio)
-                    print(f"📈 {orig} - Current price: {precio}")
-                else:
-                    resultados.append(0)
-                    print(f"⚠️ No se obtuvo precio para {orig}")
-
-            except Exception as e:
-                print(f"❌ Error para {orig}: {e}")
-                resultados.append(0)
-
-        return resultados
+        pass
 
 
-
-if __name__ == "__main__":
-    instrumentos = ["AAPL", "GOOGL"]
-    fecha_inicio = "2023-01-01"
-    fecha_fin = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    intervalo = "1d"
-
-    Source(instrumentos, fecha_inicio, fecha_fin, intervalo)
+def create_source(source_type="yahoo"):
+    """
+    Factory function para crear una instancia de la clase Source correspondiente al tipo especificado.
+    
+    Args:
+        source_type: Tipo de source a crear (e.g., "yahoo", "eodhd", "polygon")
+        
+    Returns:
+        Devuelve la clase correspondiente a la fuente de datos especificada.
+    """
+    if source_type.lower() == "yahoo" or source_type == 0:
+        from market.sourceYahoo import SourceYahoo
+        return SourceYahoo
+    # elif source_type.lower() == "eodhd" or source_type == 1:
+    #     from market.sourceEODHD import SourceEODHD
+    #     return SourceEODHD
+    # elif source_type.lower() == "polygon" or source_type == 2:
+    #     from market.sourcePolygon import SourcePolygon
+    #     return SourcePolygon
+    else:
+        raise ValueError(f"Unknown source type: {source_type}")
