@@ -1,6 +1,4 @@
 import os
-import requests
-import time
 from pyroboadvisor import PyRoboAdvisor
 from config_utils import get_parameters 
 
@@ -30,21 +28,9 @@ pra.completeTickersWithIB()  # Completa los tickers de IB que no están en el SP
 
 pra.prepare()  # Prepara los datos y la estrategia
 
-# La simulacion puede fallar por problemas de conexion, asi que intentamos varias veces
-for intento in range(3): # Parametrizar el numero de reintentos?
-    try:
-        if p["b"]:
-            pra.simulate(signoMultiplexado=usms)
-        else:
-            pra.simulate()
-        break  # Todo ok
-    except requests.exceptions.ConnectionError as e:
-        print(f"Capturado error de conexion con pyroboadvisor. Reintento {intento+1}: {e}")
-        if intento < 2:
-            time.sleep(300)  # Espera 5 minutos antes de reintentar
-            pra.prepare() # Un reintento puede alterar la simulacion, asi que la preparamos de nuevo
-        else:
-            print("Demasiados intentos fallidos. Abortando.")
-            raise e
+if p["b"]:
+    pra.simulate(signoMultiplexado=usms)
+else:
+    pra.simulate()
 
 pra.automatizeOrders()
