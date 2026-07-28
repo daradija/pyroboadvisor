@@ -27,6 +27,6 @@ class VaultwardenClient(AbstractVault):
 
     def get_credentials(self, name: str) -> tuple[str, str]:
         result = self.client.fetch_credentials(name)
-        username = result.raw_data["username"]
-        password = result.raw_data["password"]
+        username = result.raw_data["login"]["username"]
+        password = result.raw_data["login"]["password"]
         return username, password
