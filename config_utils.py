@@ -48,6 +48,14 @@ def fetch_vault(config):
             except Exception as e:
                 pass
 
+            try:
+                _, flex_token = vw_client.get_credentials("flex_token")
+                if flex_token:
+                    config["flex_token"] = flex_token
+                print("Token Flex de IB recuperado del vault")
+            except Exception as e:
+                pass
+
         except Exception as e:
             print(f"Error al recuperar credenciales del vault: {e}")
 
@@ -96,6 +104,8 @@ def get_parameters(config_path):
                 "telegram_apikey": config.get("telegram_apikey", ""),
                 "telegram_channelid": config.get("telegram_channelid", ""),
                 "discord_webhook": config.get("discord_webhook", ""),
+                "flex_token": config.get("flex_token", ""),
+                "flex_query": config.get("flex_query", ""),
                 "bitwarden_url": config.get("bitwarden_url", "")
             }
             use_config = True

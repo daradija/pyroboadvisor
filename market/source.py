@@ -144,6 +144,27 @@ class Source:
             print(f"❌ Error al descargar los datos: {error}")
             return None
 
+    def history(self, symbol, start, end):
+        """
+        Cierres diarios de `symbol` entre `start` y `end` (ambos incluidos, datetime.date).
+        Sin caché en disco: si `end` es hoy, la última fila es el precio intradía actual.
+        Devuelve una pd.Series indexada por datetime.date (vacía si no hay datos).
+        """
+        df = yf.download(
+            symbol,
+            start=start.strftime("%Y-%m-%d"),
+            end=(end + timedelta(days=1)).strftime("%Y-%m-%d"),
+            interval="1d",
+            auto_adjust=True,
+            progress=False
+        )
+        if df is None or df.empty:
+            return pd.Series(dtype=float)
+        df = self.aplanar_columnas(df)
+        serie = df["Close"].dropna()
+        serie.index = [d.date() for d in pd.to_datetime(serie.index)]
+        return serie.sort_index()
+
     def aplanar_columnas(self, df):
         """
         Asegura que el DataFrame no tenga MultiIndex en las columnas.

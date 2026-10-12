@@ -628,7 +628,7 @@ class PyRoboAdvisor:
         """
         if self.tipo in ["2","3"]: # IB
             from driver.driverIB import DriverIB as Driver
-            d=Driver(self.p["puerto"])
+            d=Driver(self.p["puerto"], self.p.get("flex_token"), self.p.get("flex_query"))
             desatendido = self.p.get("desatendido", False)
             d.conectar(desatendido)
             d.completeTicketsWithIB(self.tickers)
@@ -640,6 +640,92 @@ class PyRoboAdvisor:
         schedule = nyse.schedule(start_date=today, end_date=today)
         return schedule.empty
 
+    def _sesiones_referencia(self, hoy):
+        """Sesiones NYSE de referencia: la anterior a hoy, el cierre del año pasado y la de hace un año"""
+        nyse = mcal.get_calendar('NYSE')
+        hace_un_ano = (pd.Timestamp(hoy) - pd.DateOffset(years=1)).date()
+        sesiones = [d.date() for d in nyse.valid_days(start_date=hace_un_ano - pd.Timedelta(days=10), end_date=hoy)]
+
+        def ultima(cond):
+            ds = [d for d in sesiones if cond(d)]
+            return ds[-1] if ds else None
+
+        return [
+            ("Última sesión", ultima(lambda d: d < hoy)),
+            ("Año en curso", ultima(lambda d: d.year < hoy.year)),
+            ("1 año", ultima(lambda d: d <= hace_un_ano)),
+        ]
+
+    def reportPerformance(self, benchmark="^GSPC", adjust_flows=True):
+        """
+        Rentabilidad de la cartera IB frente a `benchmark` desde la última sesión, inicio de año y hace un año.
+        Valor actual: NetLiquidation en vivo. Valores de inicio: NAV del informe Flex.
+        Con adjust_flows, la rentabilidad se ajusta por ingresos/retiradas (Modified Dietz).
+        Devuelve el texto del informe, o None si no hay datos.
+        """
+        if self.d is None:
+            return None
+        valor = self.d.netLiquidation()
+        historial = self.d.flexHistory(adjust_flows)
+        if valor is None or historial is None:
+            return None
+        nav_now, moneda = valor
+        nav, flows = historial
+        nav = pd.Series(nav).sort_index()
+
+        hoy = pd.Timestamp.now(tz='America/New_York').date()
+        referencias = self._sesiones_referencia(hoy)
+
+        inicio = min([d for _, d in referencias if d is not None] + [nav.index[0]])
+        bench = self.source.history(benchmark, inicio - pd.Timedelta(days=7), hoy)
+        if bench.empty:
+            print(f"No se pudo obtener el historial de {benchmark}.")
+            return None
+        bench_now = bench.iloc[-1]
+
+        def en_o_antes(serie, d):
+            s = serie[serie.index <= d]
+            return (s.index[-1], s.iloc[-1]) if not s.empty else (None, None)
+
+        def rentabilidad_cartera(start, S):
+            T = (hoy - start).days
+            if S <= 0 or T <= 0:
+                return None
+            if not adjust_flows:
+                return (nav_now / S - 1) * 100
+            periodo = [(d, a) for d, a in flows if start < d <= hoy]
+            F = sum(a for _, a in periodo)
+            W = sum(a * (hoy - d).days / T for d, a in periodo)
+            denom = S + W
+            return (nav_now - S - F) / denom * 100 if denom > 0 else None
+
+        def fmt(x):
+            return f"{x:+.2f}%" if x is not None else "n/a"
+
+        lineas = [
+            f"Valor de la cartera: {nav_now:,.2f} {moneda} (NetLiquidation)",
+            f"NAV Flex hasta {nav.index[-1]}{' (ajustado por flujos)' if adjust_flows else ''}",
+            f"{'Periodo':<14}{'Fecha':<12}{'Cartera':>10}{benchmark:>10}{'Dif (pp)':>10}",
+        ]
+        for etiqueta, objetivo in referencias:
+            if objetivo is None:
+                lineas.append(f"{etiqueta:<14}{'-':<12}{'n/a':>10}{'n/a':>10}{'n/a':>10}")
+                continue
+            start, S = en_o_antes(nav, objetivo)
+            nota = ""
+            if start is None:
+                start, S = nav.index[0], nav.iloc[0]
+                nota = " (primer NAV disponible)"
+            elif start != objetivo:
+                nota = f" (objetivo {objetivo})"
+
+            port = rentabilidad_cartera(start, S)
+            _, b0 = en_o_antes(bench, start)
+            bench_ret = (bench_now / b0 - 1) * 100 if b0 else None
+            dif = f"{port - bench_ret:+.2f}" if port is not None and bench_ret is not None else "n/a"
+            lineas.append(f"{etiqueta:<14}{start.isoformat():<12}{fmt(port):>10}{fmt(bench_ret):>10}{dif:>10}{nota}")
+        return "\n".join(lineas)
+
     def autoIB(self):
         if self._esta_cerrado_hoy():
             print("Advertencia: Hoy el mercado está cerrado. No se ejecutarán órdenes")
@@ -647,7 +733,7 @@ class PyRoboAdvisor:
         
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
-            self.d=Driver(self.p["puerto"])
+            self.d=Driver(self.p["puerto"], self.p.get("flex_token"), self.p.get("flex_query"))
             desatendido = self.p.get("desatendido", False)
             self.d.conectar(desatendido)
 
@@ -678,7 +764,7 @@ class PyRoboAdvisor:
     def manualIB(self):
         if self.d==None:
             from driver.driverIB import DriverIB as Driver
-            self.d=Driver(self.p["puerto"])
+            self.d=Driver(self.p["puerto"], self.p.get("flex_token"), self.p.get("flex_query"))
             desatendido = self.p.get("desatendido", False)
             self.d.conectar(desatendido)
         d=self.d
@@ -766,6 +852,16 @@ class PyRoboAdvisor:
             email_body += linea + "\n"
             if autoIB:
                 self.d.sell_limit(self.sp.symbols[order["id"]], cantidad, precio)
+
+        if autoIB:
+            try:
+                informe = self.reportPerformance()
+            except Exception as e:
+                print(f"Error al calcular la rentabilidad: {e}")
+                informe = None
+            if informe:
+                print("\nRentabilidad:\n" + informe)
+                email_body += "\nRentabilidad:\n" + informe + "\n"
 
         if (
             self.p.get("email_remitente")

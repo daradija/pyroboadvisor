@@ -28,5 +28,5 @@ polygon_key=
 email_remitente= # remitente
 email_destino= # destinatario
 email_app_password= # app pwd gmail
-
-
+flex_token= # token de Flex Web Service de IB (informe de rentabilidad, opcional)
+flex_query= # id de la consulta Flex (ver driver/FlexClient.py)

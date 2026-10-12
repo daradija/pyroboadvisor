@@ -1,15 +1,18 @@
 from typing import Optional
-
 from ib_insync import IB, LimitOrder, Contract, Order
+from driver.FlexClient import FlexClient
 import pytz
 import datetime
 import time
 import math
 
 class DriverIB:
-    def __init__(self, puerto):
+    def __init__(self, puerto, flex_token=None, flex_query=None):
         self.ib = IB()
         self.puerto=puerto
+        self.flex_token = flex_token
+        self.flex_query = flex_query
+        self.flex = None
 
     def conectar(self,puerto):
         self.ib.connect('127.0.0.1', puerto, clientId=1)
@@ -176,7 +179,38 @@ class DriverIB:
 
         contract.currency = 'USD'
         return contract
-    
+
+    def netLiquidation(self):
+        """(valor, moneda) del NetLiquidation actual de la cuenta, o None si no está disponible"""
+        account = self.ib.accountSummary()
+        net_liq = next((i for i in account
+                        if i.tag == "NetLiquidation" and i.currency == "USD"), None) \
+            or next((i for i in account if i.tag == "NetLiquidation"), None)
+        if net_liq is None:
+            print("No se encontró el valor NetLiquidation de la cuenta.")
+            return None
+        try:
+            return float(net_liq.value), net_liq.currency
+        except (TypeError, ValueError):
+            print(f"Valor NetLiquidation no válido: {net_liq.value}")
+            return None
+
+    def flexHistory(self, adjust_flows=True):
+        """(nav {date: valor}, flujos [(date, importe)]) del informe Flex, o None si no hay Flex configurado o falla"""
+        if not self.flex_token or not self.flex_query:
+            return None
+        if self.flex is None:
+            self.flex = FlexClient(token=self.flex_token, query_id=self.flex_query)
+        try:
+            nav = self.flex.nav_history()
+            flows = self.flex.cash_flows() if adjust_flows else []
+        except Exception as error:
+            print(f"No se pudo obtener el informe Flex: {error}")
+            return None
+        if not nav:
+            print("No se pudo obtener el historial de NAV desde Flex.")
+            return None
+        return nav, flows
 
 if __name__ == "__main__":
     d=DriverIB(7497)
