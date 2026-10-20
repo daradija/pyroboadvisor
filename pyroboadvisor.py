@@ -641,7 +641,7 @@ class PyRoboAdvisor:
         return schedule.empty
 
     def _sesiones_referencia(self, hoy):
-        """Sesiones NYSE de referencia: la anterior a hoy, el cierre del año pasado y la de hace un año"""
+        """Sesiones NYSE de referencia: la anterior a `hoy`, el cierre del año pasado y la de hace un año"""
         nyse = mcal.get_calendar('NYSE')
         hace_un_ano = (pd.Timestamp(hoy) - pd.DateOffset(years=1)).date()
         sesiones = [d.date() for d in nyse.valid_days(start_date=hace_un_ano - pd.Timedelta(days=10), end_date=hoy)]
@@ -658,53 +658,56 @@ class PyRoboAdvisor:
 
     def reportPerformance(self, benchmark="^GSPC", adjust_flows=True):
         """
-        Rentabilidad de la cartera IB frente a `benchmark` desde la última sesión, inicio de año y hace un año.
-        Valor actual: NetLiquidation en vivo. Valores de inicio: NAV del informe Flex.
+        Rentabilidad de la cartera IB frente a `benchmark` en la última sesión, el año en curso y el último año.
+        Inicio y fin salen del NAV de cierre del informe Flex (el fin es su última fecha), para que cuadre con Flex;
+        el NetLiquidation en vivo solo se muestra como referencia.
         Con adjust_flows, la rentabilidad se ajusta por ingresos/retiradas (Modified Dietz).
         Devuelve el texto del informe, o None si no hay datos.
         """
         if self.d is None:
             return None
-        valor = self.d.netLiquidation()
         historial = self.d.flexHistory(adjust_flows)
-        if valor is None or historial is None:
+        if historial is None:
             return None
-        nav_now, moneda = valor
         nav, flows = historial
         nav = pd.Series(nav).sort_index()
 
-        hoy = pd.Timestamp.now(tz='America/New_York').date()
-        referencias = self._sesiones_referencia(hoy)
+        fin, nav_fin = nav.index[-1], nav.iloc[-1]
+        referencias = self._sesiones_referencia(fin)
 
         inicio = min([d for _, d in referencias if d is not None] + [nav.index[0]])
-        bench = self.source.history(benchmark, inicio - pd.Timedelta(days=7), hoy)
+        bench = self.source.history(benchmark, inicio - pd.Timedelta(days=7), fin)
         if bench.empty:
             print(f"No se pudo obtener el historial de {benchmark}.")
             return None
-        bench_now = bench.iloc[-1]
 
         def en_o_antes(serie, d):
             s = serie[serie.index <= d]
             return (s.index[-1], s.iloc[-1]) if not s.empty else (None, None)
 
+        _, bench_fin = en_o_antes(bench, fin)
+
         def rentabilidad_cartera(start, S):
-            T = (hoy - start).days
+            T = (fin - start).days
             if S <= 0 or T <= 0:
                 return None
             if not adjust_flows:
-                return (nav_now / S - 1) * 100
-            periodo = [(d, a) for d, a in flows if start < d <= hoy]
+                return (nav_fin / S - 1) * 100
+            periodo = [(d, a) for d, a in flows if start < d <= fin]
             F = sum(a for _, a in periodo)
-            W = sum(a * (hoy - d).days / T for d, a in periodo)
+            W = sum(a * (fin - d).days / T for d, a in periodo)
             denom = S + W
-            return (nav_now - S - F) / denom * 100 if denom > 0 else None
+            return (nav_fin - S - F) / denom * 100 if denom > 0 else None
 
         def fmt(x):
             return f"{x:+.2f}%" if x is not None else "n/a"
 
-        lineas = [
-            f"Valor de la cartera: {nav_now:,.2f} {moneda} (NetLiquidation)",
-            f"NAV Flex hasta {nav.index[-1]}{' (ajustado por flujos)' if adjust_flows else ''}",
+        lineas = []
+        valor = self.d.netLiquidation()
+        if valor is not None:
+            lineas.append(f"Valor actual de la cartera: {valor[0]:,.2f} {valor[1]} (NetLiquidation)")
+        lineas += [
+            f"NAV Flex a cierre de {fin}: {nav_fin:,.2f}{' (ajustado por flujos)' if adjust_flows else ''}",
             f"{'Periodo':<14}{'Fecha':<12}{'Cartera':>10}{benchmark:>10}{'Dif (pp)':>10}",
         ]
         for etiqueta, objetivo in referencias:
@@ -721,7 +724,7 @@ class PyRoboAdvisor:
 
             port = rentabilidad_cartera(start, S)
             _, b0 = en_o_antes(bench, start)
-            bench_ret = (bench_now / b0 - 1) * 100 if b0 else None
+            bench_ret = (bench_fin / b0 - 1) * 100 if b0 and bench_fin else None
             dif = f"{port - bench_ret:+.2f}" if port is not None and bench_ret is not None else "n/a"
             lineas.append(f"{etiqueta:<14}{start.isoformat():<12}{fmt(port):>10}{fmt(bench_ret):>10}{dif:>10}{nota}")
         return "\n".join(lineas)

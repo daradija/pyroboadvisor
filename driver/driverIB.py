@@ -198,6 +198,7 @@ class DriverIB:
     def flexHistory(self, adjust_flows=True):
         """(nav {date: valor}, flujos [(date, importe)]) del informe Flex, o None si no hay Flex configurado o falla"""
         if not self.flex_token or not self.flex_query:
+            print("Flex no configurado (falta flex_token o flex_query): no se calcula la rentabilidad.")
             return None
         if self.flex is None:
             self.flex = FlexClient(token=self.flex_token, query_id=self.flex_query)

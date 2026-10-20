@@ -98,6 +98,11 @@ class FlexClient:
         except Exception:
             return flows
         for r in rows:
+            # Con "Summary" activado, Flex añade filas resumen que duplicarían los flujos de detalle
+            if str(getattr(r, "levelOfDetail", "DETAIL") or "DETAIL").upper() != "DETAIL":
+                continue
+            if str(getattr(r, "currency", "")).upper() == "BASE_SUMMARY":
+                continue
             if "deposit" not in str(getattr(r, "type", "")).lower():
                 continue
             d = self._to_date(getattr(r, "reportDate", "") or getattr(r, "dateTime", ""))
