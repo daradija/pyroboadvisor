@@ -79,15 +79,26 @@ class FlexClient:
             return None
 
     def nav_history(self):
-        """{date: NAV in base currency} (agrupa todas las cuentas)."""
+        """{date: NAV in base currency} (agrupa todas las cuentas).
+        Una misma fecha aparece en varios FlexStatement
+        Se debe quedar con el valor del statement más reciente en lugar de sumarlos."""
+        root = self.fetch().root
+        statements = list(root.iter("FlexStatement")) or [root]
+        statements.sort(key=lambda s: (s.get("toDate", ""), s.get("whenGenerated", "")))
+
+        por_cuenta = {}
+        for st in statements:
+            for el in st.iter(self.NAV_TOPIC):
+                d = self._to_date(el.get("reportDate", ""))
+                try:
+                    if d:
+                        por_cuenta[(el.get("accountId", ""), d)] = float(el.get("total"))
+                except (TypeError, ValueError):
+                    continue
+
         nav = {}
-        for r in self.fetch().extract(self.NAV_TOPIC, parseNumbers=False):
-            d = self._to_date(getattr(r, "reportDate", ""))
-            try:
-                if d:
-                    nav[d] = nav.get(d, 0.0) + float(r.total)
-            except (TypeError, ValueError, AttributeError):
-                continue
+        for (_, d), total in por_cuenta.items():
+            nav[d] = nav.get(d, 0.0) + total
         return nav
 
     def cash_flows(self):
