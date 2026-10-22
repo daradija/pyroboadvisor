@@ -46,14 +46,16 @@ class FlexClient:
         if self._report is not None and not force:
             return self._report
 
-        r = requests.get(f"{self.BASE}/SendRequest", params={"t": self.token, "q": self.query_id, "v": 3}, timeout=30)
+        r = self._get(f"{self.BASE}/SendRequest", params={"t": self.token, "q": self.query_id, "v": 3}, timeout=30)
         root = ET.fromstring(r.content)
         if root.findtext("Status") != "Success":
             raise RuntimeError(f"Flex SendRequest ha fallado: {root.findtext('ErrorCode')} {root.findtext('ErrorMessage')}")
         ref, url = root.findtext("ReferenceCode"), root.findtext("Url")
 
         for attempt in range(1, self.retries + 1):
-            r = requests.get(url, params={"q": ref, "t": self.token, "v": 3}, timeout=60)
+            # Si el host que devuelve IB (p.ej. gdcdyn) no resuelve, se usa el host base
+            r = self._get(url, params={"q": ref, "t": self.token, "v": 3}, timeout=60,
+                          fallback=f"{self.BASE}/GetStatement")
             root = ET.fromstring(r.content)
             if root.tag != "FlexStatementResponse":      
                 report = FlexReport()
@@ -67,6 +69,24 @@ class FlexClient:
                 continue
             raise RuntimeError(f"Flex GetStatementha fallado: {code} {msg}")
         raise TimeoutError("Informe Flex no esta disponible tras varios intentos")
+
+    def _get(self, url, params, timeout, fallback=None, intentos=3):
+        """GET con reintentos ante errores de red (DNS, conexión, timeout).
+        Tras el primer fallo prueba `fallback` si se indica. Los errores no incluyen la URL para no mostrar el token."""
+        urls = [url] if not fallback or fallback == url else [url, fallback]
+        ultimo = None
+        for intento in range(1, intentos + 1):
+            for u in urls:
+                try:
+                    r = requests.get(u, params=params, timeout=timeout)
+                    r.raise_for_status()
+                    return r
+                except requests.RequestException as e:
+                    ultimo = f"{type(e).__name__} en {requests.utils.urlparse(u).hostname}"
+                    print(f"Error de red con Flex ({ultimo}), intento {intento}/{intentos}")
+            if intento < intentos:
+                time.sleep(self.wait)
+        raise ConnectionError(f"No se pudo conectar con Flex: {ultimo}")
 
     @staticmethod
     def _to_date(raw):
