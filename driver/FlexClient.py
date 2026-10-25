@@ -32,13 +32,14 @@ class FlexClient:
     NAV_TOPIC = "EquitySummaryByReportDateInBase" # NAV es Net Asset Value
     CASH_TOPIC = "CashTransaction"
 
-    def __init__(self, token=None, query_id=None, retries=12, wait=5):
+    def __init__(self, token=None, query_id=None, retries=15, wait=5, max_wait=150):
         self.token = token # Se obtiene de Flex Web Service Configuration
         self.query_id = query_id # Se obtiene al editar el informe Flex
         if not self.token or not self.query_id:
             raise ValueError("Faltan token o query_id para FlexClient")
         self.retries = retries
         self.wait = wait
+        self.max_wait = max_wait     # la espera crece wait, 2*wait, ... hasta max_wait (unos 6 min en total por defecto)
         self._report = None          # cached: solo una descarga (Flex tiene limite de 10 descargas por hora)
 
     def fetch(self, force=False):
@@ -63,9 +64,10 @@ class FlexClient:
                 self._report = report
                 return report
             code, msg = root.findtext("ErrorCode"), root.findtext("ErrorMessage")
-            if code == "1019":
-                print(f"Informe Flex no esta disponible (attempt {attempt}/{self.retries}), esperando {self.wait}s...")
-                time.sleep(self.wait)
+            if code == "1019":   # el informe aún se está generando: los periodos largos pueden tardar minutos
+                espera = min(self.wait * attempt, self.max_wait)
+                print(f"Informe Flex no esta aun disponible, esperando {espera}s...")
+                time.sleep(espera)
                 continue
             raise RuntimeError(f"Flex GetStatementha fallado: {code} {msg}")
         raise TimeoutError("Informe Flex no esta disponible tras varios intentos")
