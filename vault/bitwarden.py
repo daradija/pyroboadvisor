@@ -24,6 +24,23 @@ class VaultwardenClient(AbstractVault):
             https_verify=False  # Desactivación de la verificación HTTPS para entornos selfhosting self-signed
         )
         self.client = WardenClient(config)
+        self._parchear_prelogin()
+
+    def _parchear_prelogin(self):
+        '''
+        Las versiones recientes de Vaultwarden ya no sirven /api/accounts/prelogin; el
+        prelogin está en /identity/accounts/prelogin (misma respuesta). La librería usa
+        la ruta antigua, así que redirigimos la llamada.
+        '''
+        session = self.client._session
+        post_original = session.post
+
+        def post(url, *args, **kwargs):
+            if url.rstrip('/').endswith('/api/accounts/prelogin'):
+                url = url.replace('/api/accounts/prelogin', '/identity/accounts/prelogin')
+            return post_original(url, *args, **kwargs)
+
+        session.post = post
 
     def get_credentials(self, name: str) -> tuple[str, str]:
         result = self.client.fetch_credentials(name)
