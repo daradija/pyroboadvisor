@@ -707,7 +707,7 @@ class PyRoboAdvisor:
         if valor is not None:
             lineas.append(f"Valor actual de la cartera: {valor[0]:,.2f} {valor[1]} (NetLiquidation)")
         lineas += [
-            f"NAV Flex a cierre de {fin}: {nav_fin:,.2f}{' (ajustado por flujos)' if adjust_flows else ''}",
+            f"NAV Flex a cierre de {fin}: {nav_fin:,.2f}",
             f"{'Periodo':<14}{'Fecha':<12}{'Cartera':>10}{benchmark:>10}{'Dif (pp)':>10}",
         ]
         for etiqueta, objetivo in referencias:
